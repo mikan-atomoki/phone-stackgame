@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tilt Tower</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    touch-action: none;
+    background: #0a0a2e;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  canvas {
+    display: block;
+    width: 100%; height: 100%;
+  }
+
+  /* Screens */
+  .screen {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 10;
+    transition: opacity 0.4s;
+  }
+  .screen.hidden { opacity: 0; pointer-events: none; }
+
+  #startScreen {
+    background: linear-gradient(135deg, #0a0a2e 0%, #1a1a4e 100%);
+  }
+  #startScreen h1 {
+    font-size: 3rem; color: #fff;
+    text-shadow: 0 0 30px rgba(100, 200, 255, 0.5);
+    margin-bottom: 0.5rem;
+  }
+  #startScreen .subtitle {
+    color: rgba(255,255,255,0.6); font-size: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .btn {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    border: none; color: #fff;
+    padding: 16px 48px; border-radius: 50px;
+    font-size: 1.2rem; font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(79, 172, 254, 0.4);
+  }
+  .btn:active { transform: scale(0.95); }
+
+  #gameOverScreen {
+    background: rgba(10, 10, 46, 0.92);
+  }
+  #gameOverScreen h2 {
+    font-size: 2.2rem; color: #ff6b6b;
+    margin-bottom: 0.5rem;
+  }
+  #gameOverScreen .score-display {
+    font-size: 3.5rem; color: #4facfe;
+    font-weight: bold; margin: 1rem 0;
+  }
+  #gameOverScreen .best-score {
+    color: rgba(255,255,255,0.5); font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+  #gameOverScreen .height-display {
+    color: rgba(255,255,255,0.7); font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* HUD */
+  #hud {
+    position: fixed; top: 0; left: 0; right: 0;
+    padding: 16px 20px;
+    display: flex; justify-content: space-between;
+    z-index: 5; color: #fff; font-size: 1.1rem;
+    pointer-events: none;
+  }
+  #hud .label { opacity: 0.5; font-size: 0.75rem; }
+  #hud .value { font-weight: bold; font-size: 1.4rem; }
+
+  /* Tilt indicator */
+  #tiltIndicator {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 5; pointer-events: none;
+    display: flex; align-items: center; gap: 8px;
+    color: rgba(255,255,255,0.4); font-size: 0.8rem;
+  }
+  #tiltBar {
+    width: 120px; height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px; position: relative;
+  }
+  #tiltDot {
+    width: 12px; height: 12px;
+    background: #4facfe; border-radius: 50%;
+    position: absolute; top: -3px;
+    left: 50%; transform: translateX(-50%);
+    transition: left 0.1s;
+    box-shadow: 0 0 8px rgba(79, 172, 254, 0.6);
+  }
+
+  /* Permission prompt */
+  #permissionPrompt {
+    position: fixed; inset: 0;
+    background: rgba(10, 10, 46, 0.95);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 20; color: #fff; text-align: center;
+    padding: 2rem;
+  }
+  #permissionPrompt.hidden { display: none; }
+  #permissionPrompt p {
+    margin-bottom: 1.5rem; line-height: 1.6;
+    color: rgba(255,255,255,0.8);
+  }
+  #permissionPrompt .icon { font-size: 3rem; margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+
+<!-- Permission Prompt (iOS requires user gesture) -->
+<div id="permissionPrompt" class="hidden">
+  <div class="icon">📱</div>
+  <p>このゲームはスマホの傾きセンサーを使います。<br>許可をタップしてください。</p>
+  <button class="btn" id="permissionBtn">許可する</button>
+</div>
+
+<!-- Start Screen -->
+<div id="startScreen" class="screen">
+  <h1>Tilt Tower</h1>
+  <p class="subtitle">スマホを傾けてブロックを積め！</p>
+  <button class="btn" id="startBtn">START</button>
+</div>
+
+<!-- Game Over Screen -->
+<div id="gameOverScreen" class="screen hidden">
+  <h2>GAME OVER</h2>
+  <div class="height-display" id="heightDisplay"></div>
+  <div class="score-display" id="finalScore"></div>
+  <div class="best-score" id="bestScore"></div>
+  <button class="btn" id="retryBtn">RETRY</button>
+</div>
+
+<!-- HUD -->
+<div id="hud" style="display:none;">
+  <div><div class="label">SCORE</div><div class="value" id="scoreVal">0</div></div>
+  <div style="text-align:right;"><div class="label">BLOCKS</div><div class="value" id="blockCount">0</div></div>
+</div>
+
+<!-- Tilt indicator -->
+<div id="tiltIndicator" style="display:none;">
+  <span>L</span>
+  <div id="tiltBar"><div id="tiltDot"></div></div>
+  <span>R</span>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<script>
+// ===== Config =====
+const GRAVITY = 0.06;
+const DROP_SPEED_INIT = 1.5;
+const DROP_SPEED_INCREMENT = 0.05;
+const TILT_SENSITIVITY = 3.0;
+const BLOCK_HEIGHT = 40;
+const INITIAL_BLOCK_WIDTH = 160;
+const MIN_BLOCK_WIDTH = 20;
+const PERFECT_THRESHOLD = 5;
+const CAMERA_LERP = 0.05;
+
+// ===== State =====
+let canvas, ctx;
+let W, H;
+let gameState = 'start'; // start | playing | gameover
+let tiltX = 0; // -1 to 1
+let score = 0;
+let bestScoreVal = parseInt(localStorage.getItem('tiltTowerBest') || '0');
+let cameraY = 0;
+let targetCameraY = 0;
+let blocks = [];       // placed blocks
+let currentBlock = null;
+let dropSpeed = DROP_SPEED_INIT;
+let particles = [];
+let shakeAmount = 0;
+let comboCount = 0;
+let hasMotionPermission = false;
+let usingMouse = false; // fallback for desktop
+
+// ===== Colors =====
+const BLOCK_COLORS = [
+  ['#4facfe', '#00f2fe'],
+  ['#a18cd1', '#fbc2eb'],
+  ['#f093fb', '#f5576c'],
+  ['#4facfe', '#43e97b'],
+  ['#fa709a', '#fee140'],
+  ['#a8edea', '#fed6e3'],
+  ['#d4fc79', '#96e6a1'],
+  ['#ffecd2', '#fcb69f'],
+];
+
+function getBlockColor(i) {
+  return BLOCK_COLORS[i % BLOCK_COLORS.length];
+}
+
+// ===== Init =====
+function init() {
+  canvas = document.getElementById('gameCanvas');
+  ctx = canvas.getContext('2d');
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Start button
+  document.getElementById('startBtn').addEventListener('click', requestMotionAndStart);
+  document.getElementById('retryBtn').addEventListener('click', startGame);
+  document.getElementById('permissionBtn').addEventListener('click', grantPermission);
+
+  // Desktop fallback: mouse/touch
+  setupDesktopFallback();
+
+  // Loop
+  requestAnimationFrame(loop);
+}
+
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+// ===== Motion Permission =====
+function requestMotionAndStart() {
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    // iOS 13+
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('permissionPrompt').classList.remove('hidden');
+  } else if (window.DeviceOrientationEvent) {
+    // Android / others
+    enableMotion();
+    startGame();
+  } else {
+    // No sensor — use mouse/touch
+    usingMouse = true;
+    startGame();
+  }
+}
+
+function grantPermission() {
+  DeviceOrientationEvent.requestPermission().then(state => {
+    document.getElementById('permissionPrompt').classList.add('hidden');
+    if (state === 'granted') {
+      enableMotion();
+    } else {
+      usingMouse = true;
+    }
+    startGame();
+  }).catch(() => {
+    document.getElementById('permissionPrompt').classList.add('hidden');
+    usingMouse = true;
+    startGame();
+  });
+}
+
+function enableMotion() {
+  hasMotionPermission = true;
+  window.addEventListener('deviceorientation', (e) => {
+    // gamma: left-right tilt (-90 to 90)
+    const gamma = e.gamma || 0;
+    tiltX = Math.max(-1, Math.min(1, gamma / 30));
+  });
+}
+
+function setupDesktopFallback() {
+  // Mouse move for desktop testing
+  window.addEventListener('mousemove', (e) => {
+    if (!hasMotionPermission) {
+      usingMouse = true;
+      const centerX = W / 2;
+      tiltX = Math.max(-1, Math.min(1, (e.clientX - centerX) / (W * 0.35)));
+    }
+  });
+  // Touch move
+  window.addEventListener('touchmove', (e) => {
+    if (!hasMotionPermission && e.touches.length > 0) {
+      usingMouse = true;
+      const centerX = W / 2;
+      tiltX = Math.max(-1, Math.min(1, (e.touches[0].clientX - centerX) / (W * 0.35)));
+    }
+  }, { passive: true });
+}
+
+// ===== Game Logic =====
+function startGame() {
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('gameOverScreen').classList.add('hidden');
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('tiltIndicator').style.display = 'flex';
+
+  score = 0;
+  blocks = [];
+  particles = [];
+  comboCount = 0;
+  dropSpeed = DROP_SPEED_INIT;
+  cameraY = 0;
+  targetCameraY = 0;
+  shakeAmount = 0;
+
+  // Base platform
+  blocks.push({
+    x: W / 2,
+    y: H - 60,
+    w: INITIAL_BLOCK_WIDTH + 40,
+    h: BLOCK_HEIGHT,
+    color: ['#555', '#777'],
+    isBase: true,
+  });
+
+  spawnBlock();
+  gameState = 'playing';
+  updateHUD();
+}
+
+function spawnBlock() {
+  const prev = blocks[blocks.length - 1];
+  const widthShrink = Math.max(0, (blocks.length - 1) * 2);
+  const newWidth = Math.max(MIN_BLOCK_WIDTH, INITIAL_BLOCK_WIDTH - widthShrink);
+
+  // Spawn at random X — spread increases with level
+  const level = blocks.length - 1;
+  const spread = Math.min(W * 0.4, 60 + level * 8);
+  const offsetX = (Math.random() - 0.5) * 2 * spread;
+  const spawnX = Math.max(newWidth / 2, Math.min(W - newWidth / 2, prev.x + offsetX));
+
+  currentBlock = {
+    x: spawnX,
+    y: prev.y - 250,
+    w: newWidth,
+    h: BLOCK_HEIGHT,
+    vy: dropSpeed,
+    color: getBlockColor(blocks.length),
+    placed: false,
+  };
+}
+
+function placeBlock() {
+  if (!currentBlock || currentBlock.placed) return;
+
+  const prev = blocks[blocks.length - 1];
+  const blockTop = currentBlock.y - currentBlock.h / 2;
+  const prevTop = prev.y - prev.h / 2;
+
+  // Snap to top of previous block
+  currentBlock.y = prevTop - currentBlock.h / 2;
+
+  // Calculate overhang
+  const dx = currentBlock.x - prev.x;
+  const overlap = getOverlap(currentBlock, prev);
+
+  if (overlap <= 0) {
+    // Missed completely
+    gameOver();
+    return;
+  }
+
+  // Trim the block to the overlapping part
+  const overlapCenter = getOverlapCenter(currentBlock, prev);
+  const isPerfect = Math.abs(dx) < PERFECT_THRESHOLD;
+
+  if (isPerfect) {
+    // Perfect placement — no trim, bonus!
+    comboCount++;
+    score += 100 + comboCount * 50;
+    spawnPerfectParticles(currentBlock);
+    // Slight width bonus on perfect
+    currentBlock.w = Math.min(currentBlock.w + 4, prev.w);
+  } else {
+    comboCount = 0;
+    currentBlock.x = overlapCenter;
+    currentBlock.w = overlap;
+    score += Math.round(overlap / 2);
+
+    // Spawn falling-off piece particles
+    spawnSliceParticles(currentBlock, prev, dx);
+  }
+
+  currentBlock.placed = true;
+  blocks.push(currentBlock);
+
+  // Camera
+  targetCameraY = Math.max(0, (H - 60) - currentBlock.y - H * 0.55);
+
+  // Speed up
+  dropSpeed += DROP_SPEED_INCREMENT;
+
+  // Check block width
+  if (currentBlock.w < MIN_BLOCK_WIDTH) {
+    gameOver();
+    return;
+  }
+
+  updateHUD();
+  spawnBlock();
+}
+
+function getOverlap(a, b) {
+  const aL = a.x - a.w / 2;
+  const aR = a.x + a.w / 2;
+  const bL = b.x - b.w / 2;
+  const bR = b.x + b.w / 2;
+  return Math.max(0, Math.min(aR, bR) - Math.max(aL, bL));
+}
+
+function getOverlapCenter(a, b) {
+  const aL = a.x - a.w / 2;
+  const aR = a.x + a.w / 2;
+  const bL = b.x - b.w / 2;
+  const bR = b.x + b.w / 2;
+  const oL = Math.max(aL, bL);
+  const oR = Math.min(aR, bR);
+  return (oL + oR) / 2;
+}
+
+function gameOver() {
+  gameState = 'gameover';
+  shakeAmount = 15;
+
+  // Vibrate
+  if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
+
+  const placedCount = blocks.length - 1;
+  const heightM = (placedCount * BLOCK_HEIGHT / 100).toFixed(1);
+
+  if (score > bestScoreVal) {
+    bestScoreVal = score;
+    localStorage.setItem('tiltTowerBest', bestScoreVal);
+  }
+
+  setTimeout(() => {
+    document.getElementById('hud').style.display = 'none';
+    document.getElementById('tiltIndicator').style.display = 'none';
+    document.getElementById('heightDisplay').textContent = `${placedCount} blocks (${heightM}m)`;
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('bestScore').textContent = `BEST: ${bestScoreVal}`;
+    document.getElementById('gameOverScreen').classList.remove('hidden');
+  }, 800);
+}
+
+function updateHUD() {
+  document.getElementById('scoreVal').textContent = score;
+  document.getElementById('blockCount').textContent = blocks.length - 1;
+}
+
+// ===== Particles =====
+function spawnPerfectParticles(block) {
+  for (let i = 0; i < 20; i++) {
+    particles.push({
+      x: block.x + (Math.random() - 0.5) * block.w,
+      y: block.y,
+      vx: (Math.random() - 0.5) * 4,
+      vy: -Math.random() * 5 - 2,
+      life: 1,
+      decay: 0.015 + Math.random() * 0.01,
+      size: 3 + Math.random() * 4,
+      color: '#ffe066',
+    });
+  }
+}
+
+function spawnSliceParticles(block, prev, dx) {
+  const side = dx > 0 ? 1 : -1;
+  const edgeX = block.x + side * block.w / 2;
+  for (let i = 0; i < 8; i++) {
+    particles.push({
+      x: edgeX + side * Math.random() * 20,
+      y: block.y + (Math.random() - 0.5) * block.h,
+      vx: side * (1 + Math.random() * 2),
+      vy: Math.random() * 2,
+      life: 1,
+      decay: 0.02 + Math.random() * 0.01,
+      size: 2 + Math.random() * 3,
+      color: block.color[0],
+    });
+  }
+}
+
+function updateParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.1;
+    p.life -= p.decay;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+}
+
+// ===== Rendering =====
+function drawBlock(block, camY) {
+  const x = block.x - block.w / 2;
+  const y = block.y + camY;
+
+  // Skip if off screen
+  if (y + block.h < -50 || y > H + 50) return;
+
+  const grad = ctx.createLinearGradient(x, y, x + block.w, y + block.h);
+  grad.addColorStop(0, block.color[0]);
+  grad.addColorStop(1, block.color[1]);
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  roundRect(x + 3, y + 3, block.w, block.h, 6);
+
+  // Block
+  ctx.fillStyle = grad;
+  roundRect(x, y, block.w, block.h, 6);
+
+  // Highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  roundRect(x + 2, y + 2, block.w - 4, block.h / 2 - 2, 4);
+}
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawParticles(camY) {
+  for (const p of particles) {
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y + camY, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawBackground(camY) {
+  // Gradient background
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#0a0a2e');
+  grad.addColorStop(1, '#1a1a4e');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 1;
+  const gridSize = 60;
+  const offsetY = camY % gridSize;
+  for (let y = offsetY; y < H; y += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
+  }
+  for (let x = 0; x < W; x += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, H);
+    ctx.stroke();
+  }
+
+  // Height markers
+  ctx.fillStyle = 'rgba(255,255,255,0.1)';
+  ctx.font = '11px sans-serif';
+  const baseY = H - 60;
+  for (let i = 1; i <= 50; i++) {
+    const markerY = baseY - i * BLOCK_HEIGHT * 5 + camY;
+    if (markerY > -20 && markerY < H + 20) {
+      ctx.fillText(`${(i * 5 * BLOCK_HEIGHT / 100).toFixed(0)}m`, 8, markerY + 4);
+      ctx.fillRect(0, markerY, W, 1);
+    }
+  }
+}
+
+function drawComboText(camY) {
+  if (comboCount >= 2 && currentBlock) {
+    const prev = blocks[blocks.length - 1];
+    ctx.save();
+    ctx.font = `bold ${18 + comboCount * 2}px sans-serif`;
+    ctx.fillStyle = '#ffe066';
+    ctx.textAlign = 'center';
+    ctx.globalAlpha = 0.8;
+    ctx.fillText(`PERFECT x${comboCount}!`, W / 2, prev.y + camY - 30);
+    ctx.restore();
+  }
+}
+
+// Tilt indicator
+function updateTiltIndicator() {
+  const pct = (tiltX + 1) / 2 * 100;
+  document.getElementById('tiltDot').style.left = pct + '%';
+}
+
+// ===== Game Loop =====
+function loop() {
+  // Camera
+  cameraY += (targetCameraY - cameraY) * CAMERA_LERP;
+
+  // Shake
+  let shakeX = 0, shakeY = 0;
+  if (shakeAmount > 0) {
+    shakeX = (Math.random() - 0.5) * shakeAmount;
+    shakeY = (Math.random() - 0.5) * shakeAmount;
+    shakeAmount *= 0.9;
+    if (shakeAmount < 0.5) shakeAmount = 0;
+  }
+
+  const camY = cameraY + shakeY;
+
+  ctx.save();
+  ctx.translate(shakeX, 0);
+
+  // Draw
+  drawBackground(camY);
+
+  // Placed blocks
+  for (const b of blocks) {
+    drawBlock(b, camY);
+  }
+
+  // Current falling block
+  if (gameState === 'playing' && currentBlock && !currentBlock.placed) {
+    // Move with tilt
+    currentBlock.x += tiltX * TILT_SENSITIVITY;
+
+    // Clamp to screen
+    currentBlock.x = Math.max(currentBlock.w / 2, Math.min(W - currentBlock.w / 2, currentBlock.x));
+
+    // Fall
+    currentBlock.y += currentBlock.vy;
+
+    // Check if landed
+    const prev = blocks[blocks.length - 1];
+    const landY = prev.y - prev.h / 2 - currentBlock.h / 2;
+    if (currentBlock.y >= landY) {
+      currentBlock.y = landY;
+      placeBlock();
+    }
+
+    if (currentBlock && !currentBlock.placed) {
+      drawBlock(currentBlock, camY);
+
+      // Guide line
+      ctx.setLineDash([4, 8]);
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(currentBlock.x, currentBlock.y + currentBlock.h / 2 + camY);
+      ctx.lineTo(currentBlock.x, prev.y + camY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  drawParticles(camY);
+  drawComboText(camY);
+
+  ctx.restore();
+
+  updateParticles();
+  updateTiltIndicator();
+
+  requestAnimationFrame(loop);
+}
+
+// ===== Start =====
+init();
+</script>
+</body>
+</html>
