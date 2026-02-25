@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0a2e"/>
+      <stop offset="100%" stop-color="#1a1a4e"/>
+    </linearGradient>
+    <linearGradient id="b1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4facfe"/>
+      <stop offset="100%" stop-color="#00f2fe"/>
+    </linearGradient>
+    <linearGradient id="b2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a18cd1"/>
+      <stop offset="100%" stop-color="#fbc2eb"/>
+    </linearGradient>
+    <linearGradient id="b3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f093fb"/>
+      <stop offset="100%" stop-color="#f5576c"/>
+    </linearGradient>
+    <linearGradient id="b4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fa709a"/>
+      <stop offset="100%" stop-color="#fee140"/>
+    </linearGradient>
+    <linearGradient id="b5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4facfe"/>
+      <stop offset="100%" stop-color="#43e97b"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="url(#bg)"/>
+  <!-- Grid lines -->
+  <g stroke="rgba(255,255,255,0.05)" stroke-width="1">
+    <line x1="0" y1="128" x2="512" y2="128"/>
+    <line x1="0" y1="256" x2="512" y2="256"/>
+    <line x1="0" y1="384" x2="512" y2="384"/>
+    <line x1="128" y1="0" x2="128" y2="512"/>
+    <line x1="256" y1="0" x2="256" y2="512"/>
+    <line x1="384" y1="0" x2="384" y2="512"/>
+  </g>
+  <!-- Base platform -->
+  <rect x="86" y="400" width="340" height="48" rx="8" fill="#555"/>
+  <!-- Block 1 -->
+  <rect x="102" y="340" width="308" height="56" rx="10" fill="url(#b1)"/>
+  <rect x="106" y="344" width="300" height="24" rx="6" fill="rgba(255,255,255,0.15)"/>
+  <!-- Block 2 -->
+  <rect x="120" y="278" width="272" height="56" rx="10" fill="url(#b2)"/>
+  <rect x="124" y="282" width="264" height="24" rx="6" fill="rgba(255,255,255,0.15)"/>
+  <!-- Block 3 (slightly offset right) -->
+  <rect x="140" y="216" width="240" height="56" rx="10" fill="url(#b3)"/>
+  <rect x="144" y="220" width="232" height="24" rx="6" fill="rgba(255,255,255,0.15)"/>
+  <!-- Block 4 -->
+  <rect x="156" y="154" width="208" height="56" rx="10" fill="url(#b5)"/>
+  <rect x="160" y="158" width="200" height="24" rx="6" fill="rgba(255,255,255,0.15)"/>
+  <!-- Block 5 (falling) -->
+  <rect x="172" y="76" width="176" height="56" rx="10" fill="url(#b4)" opacity="0.9"/>
+  <rect x="176" y="80" width="168" height="24" rx="6" fill="rgba(255,255,255,0.15)"/>
+  <!-- Sparkle particles -->
+  <circle cx="148" cy="206" r="5" fill="#ffe066" opacity="0.8"/>
+  <circle cx="370" cy="196" r="4" fill="#ffe066" opacity="0.6"/>
+  <circle cx="200" cy="180" r="4" fill="#ffe066" opacity="0.7"/>
+  <circle cx="310" cy="170" r="5" fill="#ffe066" opacity="0.5"/>
+  <circle cx="260" cy="148" r="3" fill="#ffe066" opacity="0.9"/>
+  <circle cx="165" cy="142" r="3" fill="#ffe066" opacity="0.6"/>
+</svg>
