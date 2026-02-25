@@ -29,11 +29,25 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch: Cache First strategy
+// Fetch: Network First for navigation (HTML), Cache First for assets
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request);
-    })
-  );
+  if (event.request.mode === 'navigate') {
+    // HTML — Network First (always get latest when online)
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+  } else {
+    // Static assets — Cache First
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        return cached || fetch(event.request);
+      })
+    );
+  }
 });
