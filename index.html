@@ -25,6 +25,8 @@
     --input-bg: rgba(255,255,255,0.1);
     --input-border: rgba(79,172,254,0.4);
     --toggle-off: rgba(255,255,255,0.15);
+    --coin-gold: #FFD700;
+    --coin-glow: rgba(255,215,0,0.4);
   }
 
   /* ===== Light Theme ===== */
@@ -41,6 +43,8 @@
     --input-bg: rgba(0,0,0,0.06);
     --input-border: rgba(43,124,255,0.4);
     --toggle-off: rgba(0,0,0,0.12);
+    --coin-gold: #DAA520;
+    --coin-glow: rgba(218,165,32,0.3);
   }
 
   /* ===== Base ===== */
@@ -379,6 +383,131 @@
     pointer-events: none;
   }
   #shareToast.show { opacity: 1; }
+
+  /* ===== Coin Balance (Start Screen) ===== */
+  .start-coins {
+    color: var(--coin-gold);
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 0.8rem;
+    letter-spacing: 1px;
+  }
+
+  /* ===== Daily Bonus Card ===== */
+  #dailyBonusCard {
+    background: var(--card-bg);
+    border: 1.5px solid var(--coin-gold);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 1rem;
+    width: 260px;
+    text-align: center;
+    box-shadow: 0 2px 12px var(--coin-glow);
+  }
+  #dailyBonusCard.hidden { display: none; }
+  .daily-title {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--coin-gold);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .daily-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .daily-dot {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--card-border);
+    background: var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55rem;
+    color: var(--text-muted);
+    transition: all 0.3s;
+  }
+  .daily-dot.claimed {
+    background: var(--coin-gold);
+    border-color: var(--coin-gold);
+    color: #1a1a2e;
+    font-weight: bold;
+  }
+  .daily-dot.current {
+    border-color: var(--coin-gold);
+    animation: dailyDotPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes dailyDotPulse {
+    0%, 100% { box-shadow: 0 0 0 0 var(--coin-glow); }
+    50% { box-shadow: 0 0 8px 3px var(--coin-glow); }
+  }
+  .daily-reward {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--coin-gold);
+    margin-bottom: 2px;
+  }
+  .daily-multiplier {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .daily-claim-btn {
+    background: var(--coin-gold);
+    border: none;
+    color: #1a1a2e;
+    padding: 8px 28px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 10px var(--coin-glow);
+    transition: transform 0.1s;
+  }
+  .daily-claim-btn:active { transform: scale(0.95); }
+  .daily-claimed-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* ===== Coin Reward (Game Over) ===== */
+  #coinReward {
+    color: var(--coin-gold);
+    font-size: 1.2rem;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 0.2rem;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.4s, transform 0.4s;
+  }
+  #coinReward.show {
+    opacity: 1;
+    transform: scale(1);
+  }
+  #streakMultiplier {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+    min-height: 1em;
+  }
+
+  /* ===== HUD Coins ===== */
+  #hudCoins {
+    position: fixed;
+    top: 48px; right: 18px;
+    z-index: 5;
+    pointer-events: none;
+    color: var(--coin-gold);
+    font-size: 0.75rem;
+    font-family: 'Courier New', monospace;
+    text-align: right;
+    opacity: 0.6;
+  }
 </style>
 </head>
 <body>
@@ -445,6 +574,14 @@
   <p class="subtitle">どこまで積める？</p>
   <p class="start-best" id="startBest"></p>
   <p class="start-greeting" id="startGreeting"></p>
+  <div id="startCoins" class="start-coins">🪙 <span id="coinBalance">0</span></div>
+  <div id="dailyBonusCard" class="hidden">
+    <div class="daily-title">デイリーボーナス</div>
+    <div class="daily-dots" id="dailyDots"></div>
+    <div class="daily-reward" id="dailyRewardText"></div>
+    <div class="daily-multiplier" id="dailyMultText"></div>
+    <div id="dailyActionArea"></div>
+  </div>
   <button class="btn" id="startBtn">START</button>
 </div>
 
@@ -456,6 +593,8 @@
   <div class="score-display" id="finalScore"></div>
   <div id="peakMoment"></div>
   <div id="nearBest" style="color:var(--accent);font-size:0.9rem;font-weight:bold;margin-bottom:0.8rem;min-height:1.2em;"></div>
+  <div id="coinReward">🪙 +<span id="coinEarnedVal">0</span></div>
+  <div id="streakMultiplier"></div>
   <div class="best-score" id="bestScore"></div>
   <button class="btn-share" id="shareBtn">Share</button>
   <button class="btn" id="retryBtn">RETRY</button>
@@ -467,6 +606,7 @@
   <div style="text-align:center;"><div class="label">HEIGHT</div><div class="value" id="heightVal">0m</div></div>
   <div style="text-align:right;"><div class="label">BLOCKS</div><div class="value" id="blockCount">0</div></div>
 </div>
+<div id="hudCoins" style="display:none;">🪙 <span id="hudCoinVal">0</span></div>
 
 <!-- Combo Gauge -->
 <div id="comboGauge">
@@ -591,6 +731,20 @@ function sfxBonus() {
   setTimeout(() => playTone('sine', 1319, 200, 0.15), 180);
 }
 
+function sfxCoinEarn() {
+  // Rising arpeggio: coin collect feel
+  playTone('sine', 987, 60, 0.15);
+  setTimeout(() => playTone('sine', 1175, 60, 0.15), 50);
+  setTimeout(() => playTone('sine', 1480, 100, 0.18), 100);
+}
+
+function sfxDailyBonus() {
+  // C6 → E6 → G6 celebration
+  playTone('sine', 1047, 120, 0.18);
+  setTimeout(() => playTone('sine', 1319, 120, 0.18), 100);
+  setTimeout(() => playTone('sine', 1568, 200, 0.22), 200);
+}
+
 // ===== Performance =====
 const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const MAX_PARTICLES = isMobile ? 50 : 100;
@@ -634,6 +788,142 @@ let freezeFrames = 0; // hitstop counter
 let milestoneText = '';
 let milestoneTimer = 0;
 let consecutiveMisses = 0; // for adaptive difficulty
+
+// ===== Coin Economy =====
+let coinBalance = parseInt(localStorage.getItem('tiltTower_coins') || '0');
+let totalCoinsEarned = parseInt(localStorage.getItem('tiltTower_totalCoinsEarned') || '0');
+
+// Daily Bonus / Streak
+const DAILY_REWARDS = [5, 8, 12, 18, 25, 35, 50];
+const STREAK_MULTIPLIERS = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6];
+let dailyStreak = parseInt(localStorage.getItem('tiltTower_dailyStreak') || '0');
+let lastDailyClaimDate = localStorage.getItem('tiltTower_lastDailyClaimDate') || '';
+let longestStreak = parseInt(localStorage.getItem('tiltTower_longestStreak') || '0');
+
+function saveCoins() {
+  localStorage.setItem('tiltTower_coins', coinBalance.toString());
+  localStorage.setItem('tiltTower_totalCoinsEarned', totalCoinsEarned.toString());
+}
+
+function addCoins(amount) {
+  coinBalance += amount;
+  totalCoinsEarned += amount;
+  saveCoins();
+}
+
+function getStreakMultiplier() {
+  const idx = Math.min(Math.max(dailyStreak, 0), STREAK_MULTIPLIERS.length - 1);
+  return STREAK_MULTIPLIERS[idx];
+}
+
+function calculateCoinsEarned(finalScore, peak) {
+  let raw = Math.floor(finalScore / 200);
+  if (peak >= 3) raw += peak * 2;
+  return Math.max(1, raw);
+}
+
+function getTodayDateStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function daysBetween(dateStr1, dateStr2) {
+  if (!dateStr1 || !dateStr2) return Infinity;
+  const d1 = new Date(dateStr1 + 'T00:00:00');
+  const d2 = new Date(dateStr2 + 'T00:00:00');
+  return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+}
+
+function checkDailyStreakStatus() {
+  const today = getTodayDateStr();
+  if (!lastDailyClaimDate) return; // first time, nothing to check
+  const gap = daysBetween(lastDailyClaimDate, today);
+  if (gap > 1) {
+    // Missed days: 2-step penalty instead of full reset
+    const penalty = Math.min(dailyStreak, 2);
+    dailyStreak = Math.max(0, dailyStreak - penalty);
+    localStorage.setItem('tiltTower_dailyStreak', dailyStreak.toString());
+  }
+}
+
+function isDailyBonusAvailable() {
+  return lastDailyClaimDate !== getTodayDateStr();
+}
+
+function claimDailyBonus() {
+  const rewardIdx = dailyStreak % DAILY_REWARDS.length;
+  const reward = DAILY_REWARDS[rewardIdx];
+  addCoins(reward);
+  dailyStreak++;
+  if (dailyStreak > longestStreak) {
+    longestStreak = dailyStreak;
+    localStorage.setItem('tiltTower_longestStreak', longestStreak.toString());
+  }
+  // Reset after Day 7
+  if (dailyStreak >= DAILY_REWARDS.length) {
+    dailyStreak = 0;
+  }
+  lastDailyClaimDate = getTodayDateStr();
+  localStorage.setItem('tiltTower_dailyStreak', dailyStreak.toString());
+  localStorage.setItem('tiltTower_lastDailyClaimDate', lastDailyClaimDate);
+  sfxDailyBonus();
+  vibrate([20, 30, 20, 30, 60]);
+  updateDailyBonusCard();
+  updateCoinDisplay();
+}
+
+function updateCoinDisplay() {
+  document.getElementById('coinBalance').textContent = coinBalance;
+  document.getElementById('hudCoinVal').textContent = coinBalance;
+}
+
+function updateDailyBonusCard() {
+  const card = document.getElementById('dailyBonusCard');
+  const dotsEl = document.getElementById('dailyDots');
+  const rewardText = document.getElementById('dailyRewardText');
+  const multText = document.getElementById('dailyMultText');
+  const actionArea = document.getElementById('dailyActionArea');
+
+  card.classList.remove('hidden');
+
+  // Build 7-day dots
+  const currentDay = dailyStreak % DAILY_REWARDS.length;
+  let dotsHTML = '';
+  for (let i = 0; i < DAILY_REWARDS.length; i++) {
+    let cls = 'daily-dot';
+    if (isDailyBonusAvailable()) {
+      // Haven't claimed today
+      if (i < currentDay) cls += ' claimed';
+      else if (i === currentDay) cls += ' current';
+    } else {
+      // Already claimed today: streak was already incremented (and possibly reset)
+      // Figure out which day was just claimed
+      const claimedUpTo = dailyStreak > 0 ? dailyStreak - 1 : DAILY_REWARDS.length - 1;
+      if (i <= claimedUpTo) cls += ' claimed';
+    }
+    dotsHTML += `<div class="${cls}">${i + 1}</div>`;
+  }
+  dotsEl.innerHTML = dotsHTML;
+
+  if (isDailyBonusAvailable()) {
+    const reward = DAILY_REWARDS[currentDay];
+    rewardText.textContent = `🪙 +${reward}`;
+    const mult = STREAK_MULTIPLIERS[Math.min(currentDay, STREAK_MULTIPLIERS.length - 1)];
+    multText.textContent = mult > 1.0 ? `ゲーム報酬 x${mult.toFixed(1)} ボーナス中` : '';
+    actionArea.innerHTML = `<button class="daily-claim-btn" id="dailyClaimBtn">受け取る</button>`;
+    document.getElementById('dailyClaimBtn').addEventListener('click', () => {
+      initAudio();
+      resumeAudio();
+      claimDailyBonus();
+    });
+  } else {
+    rewardText.textContent = '';
+    const mult = getStreakMultiplier();
+    multText.textContent = mult > 1.0 ? `ゲーム報酬 x${mult.toFixed(1)} ボーナス中` : '';
+    const dayLabel = dailyStreak > 0 ? dailyStreak : (lastDailyClaimDate === getTodayDateStr() ? DAILY_REWARDS.length : 0);
+    actionArea.innerHTML = `<div class="daily-claimed-text">受取済み ✓ Day ${dayLabel}/${DAILY_REWARDS.length}</div>`;
+  }
+}
 
 // ===== Block Colors =====
 const BLOCK_COLORS = [
@@ -728,6 +1018,7 @@ function init() {
   document.getElementById('retryBtn').addEventListener('click', () => { sfxButton(); startGame(); });
   document.getElementById('permissionBtn').addEventListener('click', () => { sfxButton(); grantPermission(); });
 
+  checkDailyStreakStatus();
   updateStartScreen();
 
   // Name prompt
@@ -806,6 +1097,8 @@ function updateStartScreen() {
   } else {
     greetEl.textContent = '';
   }
+  updateCoinDisplay();
+  updateDailyBonusCard();
 }
 
 function openSettings() {
@@ -853,7 +1146,7 @@ function closeSettings() {
 function shareScore() {
   const placedCount = blocks.length - 1;
   const heightM = (placedCount * BLOCK_HEIGHT / 100).toFixed(1);
-  const text = `${playerName}は${heightM}mまで積んだ！（スコア: ${score}）\nhttps://mikan-atomoki.github.io/phone-stackgame/`;
+  const text = `${playerName}は${heightM}mまで積んだ！（スコア: ${score}）🪙${coinBalance}\nhttps://mikan-atomoki.github.io/phone-stackgame/`;
   if (navigator.share) {
     navigator.share({ text }).catch(() => {});
   } else {
@@ -934,8 +1227,10 @@ function startGame() {
   document.getElementById('startScreen').classList.add('hidden');
   document.getElementById('gameOverScreen').classList.add('hidden');
   document.getElementById('hud').style.display = 'flex';
+  document.getElementById('hudCoins').style.display = '';
   document.getElementById('tiltIndicator').style.display = 'flex';
   document.getElementById('comboGauge').classList.remove('show');
+  updateCoinDisplay();
 
   score = 0;
   blocks = [];
@@ -1155,6 +1450,7 @@ function gameOver() {
     }
 
     document.getElementById('hud').style.display = 'none';
+    document.getElementById('hudCoins').style.display = 'none';
     document.getElementById('tiltIndicator').style.display = 'none';
     document.getElementById('comboGauge').classList.remove('show');
 
@@ -1205,6 +1501,21 @@ function gameOver() {
       newBestBadge.classList.remove('show');
       document.getElementById('bestScore').textContent = `BEST: ${bestScoreVal}`;
     }
+    // Coin reward
+    const rawCoins = calculateCoinsEarned(score, peakCombo);
+    const streakMult = getStreakMultiplier();
+    const earnedCoins = Math.max(1, Math.round(rawCoins * streakMult));
+    addCoins(earnedCoins);
+    document.getElementById('coinEarnedVal').textContent = earnedCoins;
+    const coinRewardEl = document.getElementById('coinReward');
+    coinRewardEl.classList.remove('show');
+    const streakMultEl = document.getElementById('streakMultiplier');
+    streakMultEl.textContent = streakMult > 1.0 ? `(ストリーク x${streakMult.toFixed(1)})` : '';
+    setTimeout(() => {
+      coinRewardEl.classList.add('show');
+      sfxCoinEarn();
+    }, 300);
+
     document.getElementById('gameOverScreen').classList.remove('hidden');
     updateStartScreen();
   }, 800);

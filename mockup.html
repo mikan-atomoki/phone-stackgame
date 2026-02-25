@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tilt Tower - UI/UX v2 Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #111;
+    color: #fff;
+    padding: 20px;
+  }
+
+  h1.section-title {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #888;
+    margin: 40px 0 16px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 8px;
+  }
+  h1.section-title:first-child { margin-top: 0; }
+
+  .mockup-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .phone-frame {
+    width: 320px;
+    height: 568px;
+    border: 2px solid #333;
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .phone-label {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 8px;
+  }
+
+  /* ===== DARK THEME VARIABLES ===== */
+  .theme-dark {
+    --bg-primary: #0a0a2e;
+    --bg-secondary: #1a1a4e;
+    --text-primary: #fff;
+    --text-muted: rgba(255,255,255,0.5);
+    --accent: #4facfe;
+    --accent-glow: rgba(79,172,254,0.4);
+    --card-border: rgba(255,255,255,0.08);
+    --card-bg: rgba(255,255,255,0.05);
+    --btn-bg: #4facfe;
+    --btn-hover: #3d9bee;
+  }
+
+  /* ===== LIGHT THEME VARIABLES ===== */
+  .theme-light {
+    --bg-primary: #f0f4f8;
+    --bg-secondary: #dce3ed;
+    --text-primary: #1a1a2e;
+    --text-muted: rgba(26,26,46,0.5);
+    --accent: #2b7cff;
+    --accent-glow: rgba(43,124,255,0.3);
+    --card-border: rgba(0,0,0,0.1);
+    --card-bg: rgba(0,0,0,0.04);
+    --btn-bg: #2b7cff;
+    --btn-hover: #1f6ae6;
+  }
+
+  /* ===== START SCREEN ===== */
+  .start-screen {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--bg-primary);
+    position: relative;
+  }
+  .start-screen h1 {
+    font-size: 2.4rem;
+    color: var(--text-primary);
+    text-shadow: 0 0 20px var(--accent-glow);
+    margin-bottom: 4px;
+    letter-spacing: -1px;
+  }
+  .start-screen .subtitle {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+  }
+  .start-screen .best-line {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 4px;
+  }
+  .start-screen .greeting {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+  }
+  .start-screen .greeting .name {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .start-btn {
+    background: var(--btn-bg);
+    border: none;
+    color: #fff;
+    padding: 14px 52px;
+    border-radius: 12px;
+    font-size: 1.15rem;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 16px var(--accent-glow);
+    transition: background 0.2s;
+  }
+  .start-btn:hover { background: var(--btn-hover); }
+  .settings-icon {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    backdrop-filter: blur(8px);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  /* ===== HUD + DOPAMINE ===== */
+  .play-screen {
+    width: 100%; height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  .play-bg-gradient {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, #0a0a2e 0%, #1a1a4e 40%, #2a1a3e 70%, #3a1a2e 100%);
+  }
+  .play-bg-gradient.sunset {
+    background: linear-gradient(180deg, #0a0a2e 0%, #2a1040 30%, #6b2040 60%, #c75030 85%, #e88040 100%);
+  }
+  .play-bg-gradient.space {
+    background: linear-gradient(180deg, #000010 0%, #050520 50%, #0a0a2e 100%);
+  }
+  .play-stars {
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 10%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1px 1px at 60% 25%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 80% 15%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 40% 35%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1px 1px at 10% 40%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 90% 5%, rgba(255,255,255,0.5), transparent);
+  }
+
+  .hud {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 12px 16px;
+    display: flex; justify-content: space-between;
+    color: #fff; font-size: 0.95rem;
+    z-index: 2;
+  }
+  .hud .label {
+    opacity: 0.4; font-size: 0.65rem;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .hud .value {
+    font-weight: bold; font-size: 1.3rem;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* Combo gauge */
+  .combo-gauge-wrap {
+    position: absolute; top: 54px; left: 16px; right: 16px;
+    z-index: 2;
+  }
+  .combo-gauge-track {
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .combo-gauge-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s, background 0.3s;
+  }
+  .combo-gauge-fill.c2 { width: 30%; background: #4facfe; }
+  .combo-gauge-fill.c3 { width: 50%; background: #a855f7; }
+  .combo-gauge-fill.c5 { width: 80%; background: #f59e0b; }
+  .combo-gauge-fill.c8 {
+    width: 100%;
+    background: linear-gradient(90deg, #f00, #f90, #ff0, #0f0, #0ff, #00f, #f0f);
+    background-size: 200% 100%;
+    animation: rainbow 1s linear infinite;
+  }
+  @keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .combo-label {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+    text-align: right;
+  }
+
+  /* Score pop */
+  .score-pop {
+    position: absolute;
+    font-weight: bold;
+    text-align: center;
+    z-index: 3;
+    animation: popUp 0.8s ease-out forwards;
+  }
+  .score-pop.normal {
+    color: rgba(255,255,255,0.9);
+    font-size: 1rem;
+  }
+  .score-pop.perfect {
+    color: #ffe066;
+    font-size: 1.4rem;
+    text-shadow: 0 0 12px rgba(255,224,102,0.6);
+  }
+  @keyframes popUp {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-40px) scale(0.8); opacity: 0; }
+  }
+
+  /* Milestone */
+  .milestone-text {
+    position: absolute;
+    left: 50%; top: 40%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ffe066;
+    text-shadow: 0 0 20px rgba(255,224,102,0.5);
+    letter-spacing: 4px;
+    z-index: 3;
+    animation: milestoneIn 1s ease-out forwards;
+  }
+  @keyframes milestoneIn {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    30% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+  }
+
+  /* Blocks */
+  .block-stack {
+    position: absolute;
+    bottom: 60px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+  .block {
+    margin: 0 auto -2px;
+    border-radius: 6px;
+    position: relative;
+  }
+  .block.squish {
+    animation: squish 0.2s ease-out;
+  }
+  @keyframes squish {
+    0% { transform: scaleY(1) scaleX(1); }
+    40% { transform: scaleY(0.7) scaleX(1.15); }
+    70% { transform: scaleY(1.05) scaleX(0.97); }
+    100% { transform: scaleY(1) scaleX(1); }
+  }
+
+  /* ===== GAME OVER ===== */
+  .gameover-screen {
+    width: 100%; height: 100%;
+    background: rgba(10, 10, 46, 0.94);
+    backdrop-filter: blur(4px);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .gameover-screen h2 {
+    font-size: 2rem;
+    color: #ff6b6b;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+  .new-best-badge {
+    color: #ffe066;
+    font-size: 1.4rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+    animation: newBestPulse 1s ease-in-out infinite;
+  }
+  @keyframes newBestPulse {
+    0%, 100% { transform: scale(1); text-shadow: 0 0 8px rgba(255,224,102,0.4); }
+    50% { transform: scale(1.08); text-shadow: 0 0 20px rgba(255,224,102,0.8); }
+  }
+  .go-height {
+    color: rgba(255,255,255,0.6);
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+  .go-score {
+    font-size: 3rem;
+    color: var(--accent, #4facfe);
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    margin: 8px 0;
+  }
+  .go-best {
+    color: var(--text-muted, rgba(255,255,255,0.5));
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+  }
+  .go-btn {
+    background: var(--btn-bg, #4facfe);
+    border: none;
+    color: #fff;
+    padding: 14px 44px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    transition: background 0.2s;
+  }
+  .go-btn.share {
+    background: #2ecc71;
+  }
+
+  /* Confetti */
+  .confetti-container {
+    position: absolute; inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .confetti {
+    position: absolute;
+    width: 8px; height: 8px;
+    top: -10px;
+    animation: confettiFall 2.5s linear forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(600px) rotate(720deg); opacity: 0; }
+  }
+
+  /* ===== SETTINGS ===== */
+  .settings-screen {
+    width: 100%; height: 100%;
+    background: var(--bg-primary);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .settings-screen h2 {
+    font-size: 1.6rem;
+    color: var(--text-primary);
+    margin-bottom: 28px;
+    letter-spacing: 1px;
+  }
+  .setting-card {
+    width: 260px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .setting-card .setting-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  /* Theme selector */
+  .theme-selector {
+    display: flex; gap: 6px;
+  }
+  .theme-option {
+    flex: 1;
+    padding: 8px 0;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .theme-option.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  /* Toggle */
+  .setting-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .setting-toggle-label {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+  }
+  .toggle-pill {
+    position: relative;
+    width: 48px; height: 26px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+  .toggle-pill.on {
+    background: var(--accent);
+  }
+  .toggle-pill::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.3s;
+  }
+  .toggle-pill.on::after {
+    transform: translateX(22px);
+  }
+  .setting-card input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
+  }
+  .setting-card input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+  .range-display {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .close-btn {
+    margin-top: 16px;
+    background: var(--btn-bg);
+    border: none;
+    color: #fff;
+    padding: 12px 44px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+
+  /* ===== TILT INDICATOR ===== */
+  .tilt-indicator {
+    position: absolute;
+    bottom: 16px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 6px;
+    color: rgba(255,255,255,0.3);
+    font-size: 0.7rem;
+    z-index: 2;
+  }
+  .tilt-track {
+    width: 100px; height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    position: relative;
+  }
+  .tilt-dot {
+    width: 10px; height: 10px;
+    background: var(--accent, #4facfe);
+    border-radius: 50%;
+    position: absolute;
+    top: -3px; left: 60%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 6px var(--accent-glow, rgba(79,172,254,0.4));
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== SECTION 1: START SCREEN ==================== -->
+<h1 class="section-title">1. Start Screen</h1>
+<div class="mockup-row">
+
+  <!-- Dark -->
+  <div>
+    <div class="phone-label">Dark Mode</div>
+    <div class="phone-frame theme-dark">
+      <div class="start-screen">
+        <div class="settings-icon">Settings</div>
+        <h1>Tilt Tower</h1>
+        <p class="subtitle">どこまで積める？</p>
+        <p class="best-line">BEST: 2,450</p>
+        <p class="greeting">おかえり、<span class="name">ミカン</span>さん</p>
+        <button class="start-btn">START</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Light -->
+  <div>
+    <div class="phone-label">Light Mode</div>
+    <div class="phone-frame theme-light">
+      <div class="start-screen">
+        <div class="settings-icon">Settings</div>
+        <h1>Tilt Tower</h1>
+        <p class="subtitle">どこまで積める？</p>
+        <p class="best-line">BEST: 2,450</p>
+        <p class="greeting">おかえり、<span class="name">ミカン</span>さん</p>
+        <button class="start-btn">START</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== SECTION 2: PLAYING HUD + DOPAMINE ==================== -->
+<h1 class="section-title">2. Playing - HUD + Dopamine Effects</h1>
+<div class="mockup-row">
+
+  <!-- Night sky (early game) -->
+  <div>
+    <div class="phone-label">序盤: 夜空</div>
+    <div class="phone-frame theme-dark">
+      <div class="play-screen">
+        <div class="play-bg-gradient"></div>
+
+        <!-- HUD -->
+        <div class="hud">
+          <div><div class="label">SCORE</div><div class="value">750</div></div>
+          <div style="text-align:center;"><div class="label">HEIGHT</div><div class="value">1.2m</div></div>
+          <div style="text-align:right;"><div class="label">BLOCKS</div><div class="value">3</div></div>
+        </div>
+
+        <!-- Combo gauge: 2 combo (blue) -->
+        <div class="combo-gauge-wrap">
+          <div class="combo-gauge-track">
+            <div class="combo-gauge-fill c2"></div>
+          </div>
+          <div class="combo-label">COMBO x2</div>
+        </div>
+
+        <!-- Score pop (normal) -->
+        <div class="score-pop normal" style="left:45%; top:55%;">+75</div>
+
+        <!-- Blocks -->
+        <div class="block-stack">
+          <div class="block" style="width:140px;height:36px;background:#a18cd1;"></div>
+          <div class="block" style="width:148px;height:36px;background:#4facfe;"></div>
+          <div class="block squish" style="width:152px;height:36px;background:#f093fb;"></div>
+          <div class="block" style="width:180px;height:36px;background:#555;"></div>
+        </div>
+
+        <div class="tilt-indicator">
+          <span>L</span>
+          <div class="tilt-track"><div class="tilt-dot"></div></div>
+          <span>R</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sunset (mid game) with perfect -->
+  <div>
+    <div class="phone-label">中盤: 夕焼け + Perfect</div>
+    <div class="phone-frame theme-dark">
+      <div class="play-screen">
+        <div class="play-bg-gradient sunset"></div>
+
+        <div class="hud">
+          <div><div class="label">SCORE</div><div class="value">3,200</div></div>
+          <div style="text-align:center;"><div class="label">HEIGHT</div><div class="value">4.8m</div></div>
+          <div style="text-align:right;"><div class="label">BLOCKS</div><div class="value">12</div></div>
+        </div>
+
+        <!-- Combo gauge: 5+ (gold) -->
+        <div class="combo-gauge-wrap">
+          <div class="combo-gauge-track">
+            <div class="combo-gauge-fill c5"></div>
+          </div>
+          <div class="combo-label">COMBO x5</div>
+        </div>
+
+        <!-- Score pop (perfect) -->
+        <div class="score-pop perfect" style="left:40%; top:45%;">+350</div>
+
+        <!-- Milestone -->
+        <div class="milestone-text">10 BLOCKS!</div>
+
+        <div class="tilt-indicator">
+          <span>L</span>
+          <div class="tilt-track"><div class="tilt-dot" style="left:40%;"></div></div>
+          <span>R</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Space (late game) with rainbow combo -->
+  <div>
+    <div class="phone-label">終盤: 宇宙 + 虹コンボ</div>
+    <div class="phone-frame theme-dark">
+      <div class="play-screen">
+        <div class="play-bg-gradient space"></div>
+        <div class="play-stars"></div>
+
+        <div class="hud">
+          <div><div class="label">SCORE</div><div class="value">8,400</div></div>
+          <div style="text-align:center;"><div class="label">HEIGHT</div><div class="value">10.0m</div></div>
+          <div style="text-align:right;"><div class="label">BLOCKS</div><div class="value">25</div></div>
+        </div>
+
+        <!-- Combo gauge: rainbow -->
+        <div class="combo-gauge-wrap">
+          <div class="combo-gauge-track">
+            <div class="combo-gauge-fill c8"></div>
+          </div>
+          <div class="combo-label">COMBO x8</div>
+        </div>
+
+        <!-- Milestone -->
+        <div class="milestone-text" style="animation-delay:0.5s;">10.0m!</div>
+
+        <div class="tilt-indicator">
+          <span>L</span>
+          <div class="tilt-track"><div class="tilt-dot" style="left:30%;"></div></div>
+          <span>R</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== SECTION 3: GAME OVER ==================== -->
+<h1 class="section-title">3. Game Over - NEW BEST + Confetti</h1>
+<div class="mockup-row">
+
+  <!-- Normal game over -->
+  <div>
+    <div class="phone-label">通常ゲームオーバー</div>
+    <div class="phone-frame theme-dark">
+      <div class="gameover-screen">
+        <h2>GAME OVER</h2>
+        <div class="go-height">12 blocks (4.8m)</div>
+        <div class="go-score">3,200</div>
+        <div class="go-best">BEST: 8,400</div>
+        <button class="go-btn share">Share</button>
+        <button class="go-btn">RETRY</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW BEST with confetti -->
+  <div>
+    <div class="phone-label">NEW BEST + 紙吹雪</div>
+    <div class="phone-frame theme-dark">
+      <div class="gameover-screen">
+        <div class="confetti-container">
+          <div class="confetti" style="left:10%;background:#ff6b6b;animation-delay:0s;animation-duration:2.2s;"></div>
+          <div class="confetti" style="left:20%;background:#ffe066;animation-delay:0.2s;animation-duration:2.8s;width:6px;height:12px;"></div>
+          <div class="confetti" style="left:30%;background:#4facfe;animation-delay:0.1s;animation-duration:2.5s;"></div>
+          <div class="confetti" style="left:40%;background:#43e97b;animation-delay:0.4s;animation-duration:2.3s;width:10px;height:6px;"></div>
+          <div class="confetti" style="left:50%;background:#f093fb;animation-delay:0.15s;animation-duration:2.6s;"></div>
+          <div class="confetti" style="left:60%;background:#ffe066;animation-delay:0.3s;animation-duration:2.1s;width:6px;height:10px;"></div>
+          <div class="confetti" style="left:70%;background:#ff6b6b;animation-delay:0.25s;animation-duration:2.7s;"></div>
+          <div class="confetti" style="left:80%;background:#4facfe;animation-delay:0.35s;animation-duration:2.4s;width:12px;height:6px;"></div>
+          <div class="confetti" style="left:90%;background:#43e97b;animation-delay:0.05s;animation-duration:2.9s;"></div>
+          <div class="confetti" style="left:15%;background:#f093fb;animation-delay:0.45s;animation-duration:2s;"></div>
+          <div class="confetti" style="left:45%;background:#ff6b6b;animation-delay:0.5s;animation-duration:2.2s;width:6px;height:10px;"></div>
+          <div class="confetti" style="left:75%;background:#ffe066;animation-delay:0.55s;animation-duration:2.6s;"></div>
+          <div class="confetti" style="left:35%;background:#4facfe;animation-delay:0.6s;animation-duration:2.3s;width:10px;height:6px;"></div>
+          <div class="confetti" style="left:65%;background:#43e97b;animation-delay:0.65s;animation-duration:2.8s;"></div>
+          <div class="confetti" style="left:55%;background:#f093fb;animation-delay:0.7s;animation-duration:2.1s;"></div>
+          <div class="confetti" style="left:25%;background:#ffe066;animation-delay:0.8s;animation-duration:2.4s;width:8px;height:12px;"></div>
+          <div class="confetti" style="left:85%;background:#ff6b6b;animation-delay:0.9s;animation-duration:2.5s;"></div>
+          <div class="confetti" style="left:5%;background:#4facfe;animation-delay:1.0s;animation-duration:2.7s;"></div>
+          <div class="confetti" style="left:95%;background:#43e97b;animation-delay:0.12s;animation-duration:2.2s;"></div>
+          <div class="confetti" style="left:50%;background:#f093fb;animation-delay:0.22s;animation-duration:2.9s;width:6px;height:6px;"></div>
+        </div>
+        <div class="new-best-badge">NEW BEST!</div>
+        <h2>GAME OVER</h2>
+        <div class="go-height">25 blocks (10.0m)</div>
+        <div class="go-score">8,400</div>
+        <div class="go-best">NEW BEST!</div>
+        <button class="go-btn share">Share</button>
+        <button class="go-btn">RETRY</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== SECTION 4: SETTINGS ==================== -->
+<h1 class="section-title">4. Settings Screen</h1>
+<div class="mockup-row">
+
+  <!-- Dark settings -->
+  <div>
+    <div class="phone-label">Settings (Dark)</div>
+    <div class="phone-frame theme-dark">
+      <div class="settings-screen">
+        <h2>Settings</h2>
+
+        <div class="setting-card">
+          <div class="setting-label">名前</div>
+          <input type="text" value="ミカン" readonly>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-label">テーマ</div>
+          <div class="theme-selector">
+            <button class="theme-option">自動</button>
+            <button class="theme-option active">ダーク</button>
+            <button class="theme-option">ライト</button>
+          </div>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-label">傾き感度</div>
+          <input type="range" min="0.5" max="6" step="0.1" value="3.0">
+          <div class="range-display">3.0</div>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-toggle-row">
+            <span class="setting-toggle-label">効果音</span>
+            <div class="toggle-pill on"></div>
+          </div>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-toggle-row">
+            <span class="setting-toggle-label">バイブレーション</span>
+            <div class="toggle-pill on"></div>
+          </div>
+        </div>
+
+        <button class="close-btn">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Light settings -->
+  <div>
+    <div class="phone-label">Settings (Light)</div>
+    <div class="phone-frame theme-light">
+      <div class="settings-screen">
+        <h2>Settings</h2>
+
+        <div class="setting-card">
+          <div class="setting-label">名前</div>
+          <input type="text" value="ミカン" readonly>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-label">テーマ</div>
+          <div class="theme-selector">
+            <button class="theme-option">自動</button>
+            <button class="theme-option">ダーク</button>
+            <button class="theme-option active">ライト</button>
+          </div>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-label">傾き感度</div>
+          <input type="range" min="0.5" max="6" step="0.1" value="3.0">
+          <div class="range-display">3.0</div>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-toggle-row">
+            <span class="setting-toggle-label">効果音</span>
+            <div class="toggle-pill on"></div>
+          </div>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-toggle-row">
+            <span class="setting-toggle-label">バイブレーション</span>
+            <div class="toggle-pill"></div>
+          </div>
+        </div>
+
+        <button class="close-btn">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
