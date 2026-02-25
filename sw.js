@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tilt-tower-v4';
+const CACHE_NAME = 'tilt-tower-v5';
 const ASSETS = [
   './',
   './index.html',
