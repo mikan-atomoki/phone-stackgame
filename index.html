@@ -591,6 +591,12 @@ function sfxBonus() {
   setTimeout(() => playTone('sine', 1319, 200, 0.15), 180);
 }
 
+// ===== Performance =====
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const MAX_PARTICLES = isMobile ? 50 : 100;
+const MAX_TEXT_PARTICLES = isMobile ? 6 : 12;
+const PARTICLE_MULT = isMobile ? 0.4 : 1.0; // spawn count multiplier
+
 // ===== Config =====
 const GRAVITY = 0.06;
 const DROP_SPEED_INIT = 1.5;
@@ -697,12 +703,13 @@ function lerpColor(c1, c2, t) {
 let stars = [];
 function generateStars() {
   stars = [];
-  for (let i = 0; i < 60; i++) {
+  const count = isMobile ? 25 : 60;
+  for (let i = 0; i < count; i++) {
     stars.push({
       x: Math.random(), y: Math.random(),
       size: 0.5 + Math.random() * 1.5,
       alpha: 0.3 + Math.random() * 0.5,
-      twinkleSpeed: 0.01 + Math.random() * 0.02,
+      twinkleSpeed: 0.6 + Math.random() * 1.2, // pre-scaled
       phase: Math.random() * Math.PI * 2,
     });
   }
@@ -1046,13 +1053,14 @@ function placeBlock() {
     vibrate([20, 20, 20, 20, 40]);
     spawnScoreText(currentBlock.x, currentBlock.y - 20, bonus, true);
     // Extra sparkle particles
-    for (let i = 0; i < 15; i++) {
-      particles.push({
+    const sparkleCount = Math.round(10 * PARTICLE_MULT);
+    for (let i = 0; i < sparkleCount; i++) {
+      addParticle({
         x: currentBlock.x + (Math.random() - 0.5) * currentBlock.w,
         y: currentBlock.y,
         vx: (Math.random() - 0.5) * 5,
         vy: -Math.random() * 6 - 1,
-        life: 1, decay: 0.012 + Math.random() * 0.008,
+        life: 1, decay: 0.015 + Math.random() * 0.008,
         size: 2 + Math.random() * 4,
         color: ['#FFD700','#FFA500','#FFE066'][Math.floor(Math.random()*3)],
       });
@@ -1085,14 +1093,15 @@ function placeBlock() {
     milestoneTimer = 90;
     sfxMilestone();
     vibrate([20, 20, 40, 20, 80]);
-    // Big particle burst
-    for (let i = 0; i < 30; i++) {
-      particles.push({
+    // Particle burst
+    const burstCount = Math.round(15 * PARTICLE_MULT);
+    for (let i = 0; i < burstCount; i++) {
+      addParticle({
         x: W / 2 + (Math.random() - 0.5) * W * 0.5,
         y: currentBlock.y,
         vx: (Math.random() - 0.5) * 6,
         vy: -Math.random() * 6 - 2,
-        life: 1, decay: 0.01 + Math.random() * 0.01,
+        life: 1, decay: 0.015 + Math.random() * 0.01,
         size: 3 + Math.random() * 5,
         color: ['#ffe066','#ff6b6b','#4facfe','#34d399','#e879f9'][Math.floor(Math.random()*5)],
       });
@@ -1248,7 +1257,7 @@ function updateHUD() {
 
 // ===== Score Text Particles =====
 function spawnScoreText(x, y, points, isPerfect) {
-  textParticles.push({
+  addTextParticle({
     x, y,
     text: '+' + points,
     life: 1,
@@ -1262,14 +1271,15 @@ function spawnScoreText(x, y, points, isPerfect) {
 // ===== Confetti (NEW BEST) =====
 function spawnConfetti() {
   const colors = ['#ff6b6b','#ffd93d','#4facfe','#34d399','#e879f9','#fb923c','#a78bfa'];
-  for (let i = 0; i < 120; i++) {
-    particles.push({
+  const count = Math.round(40 * PARTICLE_MULT); // was 120
+  for (let i = 0; i < count; i++) {
+    addParticle({
       x: W * Math.random(),
       y: -20 - Math.random() * 100,
       vx: (Math.random() - 0.5) * 3,
       vy: 1 + Math.random() * 3,
       life: 1,
-      decay: 0.004 + Math.random() * 0.004,
+      decay: 0.008 + Math.random() * 0.006, // faster decay
       size: 3 + Math.random() * 5,
       color: colors[Math.floor(Math.random() * colors.length)],
       isConfetti: true,
@@ -1282,9 +1292,35 @@ function spawnConfetti() {
 }
 
 // ===== Particles =====
+function addParticle(p) {
+  if (particles.length >= MAX_PARTICLES) {
+    // Evict oldest (lowest life)
+    let minIdx = 0, minLife = particles[0].life;
+    for (let i = 1; i < particles.length; i++) {
+      if (particles[i].life < minLife) { minLife = particles[i].life; minIdx = i; }
+    }
+    particles[minIdx] = p;
+  } else {
+    particles.push(p);
+  }
+}
+
+function addTextParticle(t) {
+  if (textParticles.length >= MAX_TEXT_PARTICLES) {
+    let minIdx = 0, minLife = textParticles[0].life;
+    for (let i = 1; i < textParticles.length; i++) {
+      if (textParticles[i].life < minLife) { minLife = textParticles[i].life; minIdx = i; }
+    }
+    textParticles[minIdx] = t;
+  } else {
+    textParticles.push(t);
+  }
+}
+
 function spawnPerfectParticles(block) {
-  for (let i = 0; i < 20; i++) {
-    particles.push({
+  const count = Math.round(20 * PARTICLE_MULT);
+  for (let i = 0; i < count; i++) {
+    addParticle({
       x: block.x + (Math.random() - 0.5) * block.w,
       y: block.y,
       vx: (Math.random() - 0.5) * 4,
@@ -1299,8 +1335,9 @@ function spawnPerfectParticles(block) {
 function spawnSliceParticles(block, prev, dx) {
   const side = dx > 0 ? 1 : -1;
   const edgeX = block.x + side * block.w / 2;
-  for (let i = 0; i < 8; i++) {
-    particles.push({
+  const count = Math.round(8 * PARTICLE_MULT);
+  for (let i = 0; i < count; i++) {
+    addParticle({
       x: edgeX + side * Math.random() * 20,
       y: block.y + (Math.random() - 0.5) * block.h,
       vx: side * (1 + Math.random() * 2),
@@ -1313,28 +1350,40 @@ function spawnSliceParticles(block, prev, dx) {
 }
 
 function updateParticles() {
-  for (let i = particles.length - 1; i >= 0; i--) {
+  // Swap-and-pop: O(n) instead of O(n²) splice
+  let len = particles.length;
+  for (let i = len - 1; i >= 0; i--) {
     const p = particles[i];
     p.x += p.vx;
     p.y += p.vy;
     if (p.isConfetti) {
-      p.vy += 0.02; // slow gravity for confetti
+      p.vy += 0.02;
       p.vx *= 0.99;
       p.rot += p.rotV;
     } else {
       p.vy += 0.1;
     }
     p.life -= p.decay;
-    if (p.life <= 0) particles.splice(i, 1);
+    if (p.life <= 0) {
+      particles[i] = particles[len - 1];
+      len--;
+    }
   }
-  // Text particles
-  for (let i = textParticles.length - 1; i >= 0; i--) {
+  particles.length = len;
+
+  // Text particles: swap-and-pop
+  let tLen = textParticles.length;
+  for (let i = tLen - 1; i >= 0; i--) {
     const t = textParticles[i];
     t.y += t.vy;
     t.vy *= 0.98;
     t.life -= t.decay;
-    if (t.life <= 0) textParticles.splice(i, 1);
+    if (t.life <= 0) {
+      textParticles[i] = textParticles[tLen - 1];
+      tLen--;
+    }
   }
+  textParticles.length = tLen;
 }
 
 // ===== Rendering =====
@@ -1367,13 +1416,19 @@ function drawBlock(block, camY) {
 
   // Bonus block glow
   if (block.isBonus) {
-    ctx.save();
-    ctx.shadowColor = '#FFD700';
-    ctx.shadowBlur = 16 + Math.sin(Date.now() / 150) * 6;
-    ctx.fillStyle = 'rgba(255,215,0,0.3)';
-    roundRect(x - 2, by - 2, bw + 4, bh + 4, 8);
-    ctx.shadowBlur = 0;
-    ctx.restore();
+    if (!isMobile) {
+      ctx.save();
+      ctx.shadowColor = '#FFD700';
+      ctx.shadowBlur = 16 + Math.sin(Date.now() * 0.0067) * 6;
+      ctx.fillStyle = 'rgba(255,215,0,0.3)';
+      roundRect(x - 2, by - 2, bw + 4, bh + 4, 8);
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    } else {
+      // Lightweight glow for mobile: just a colored rect
+      ctx.fillStyle = 'rgba(255,215,0,0.2)';
+      roundRect(x - 2, by - 2, bw + 4, bh + 4, 8);
+    }
   }
 
   // Shadow
@@ -1421,18 +1476,23 @@ function roundRect(x, y, w, h, r) {
 }
 
 function drawParticles(camY) {
-  for (const p of particles) {
+  const PI2 = Math.PI * 2;
+  for (let i = 0, len = particles.length; i < len; i++) {
+    const p = particles[i];
+    const py = p.isConfetti ? p.y : p.y + camY;
+    // Skip off-screen
+    if (py < -20 || py > H + 20 || p.x < -20 || p.x > W + 20) continue;
     ctx.globalAlpha = p.life;
     ctx.fillStyle = p.color;
     if (p.isConfetti) {
       ctx.save();
       ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.rotate(p.rot * 0.01745329); // deg→rad inline
       ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
       ctx.restore();
     } else {
       ctx.beginPath();
-      ctx.arc(p.x, p.y + camY, p.size, 0, Math.PI * 2);
+      ctx.arc(p.x, py, p.size, 0, PI2);
       ctx.fill();
     }
   }
@@ -1440,21 +1500,24 @@ function drawParticles(camY) {
 }
 
 function drawTextParticles(camY) {
-  for (const t of textParticles) {
-    ctx.save();
+  ctx.textAlign = 'center';
+  for (let i = 0, len = textParticles.length; i < len; i++) {
+    const t = textParticles[i];
+    const ty = t.y + camY;
+    if (ty < -30 || ty > H + 30) continue;
     ctx.globalAlpha = t.life;
     ctx.fillStyle = t.color;
     const scale = 0.8 + t.life * 0.4;
     ctx.font = `bold ${Math.round(t.size * scale)}px 'Courier New', monospace`;
-    ctx.textAlign = 'center';
-    if (t.color === '#ffe066') {
+    // Shadow only on mobile if life > 0.5 (expensive)
+    if (!isMobile && t.color === '#ffe066') {
       ctx.shadowColor = 'rgba(255,224,102,0.5)';
       ctx.shadowBlur = 8;
     }
-    ctx.fillText(t.text, t.x, t.y + camY);
-    ctx.shadowBlur = 0;
-    ctx.restore();
+    ctx.fillText(t.text, t.x, ty);
+    if (ctx.shadowBlur) ctx.shadowBlur = 0;
   }
+  ctx.globalAlpha = 1;
 }
 
 function drawBackground(camY) {
@@ -1469,13 +1532,15 @@ function drawBackground(camY) {
 
   // Stars (space stage)
   if (bg.stars) {
-    const time = Date.now() / 1000;
-    for (const s of stars) {
-      const a = s.alpha * (0.5 + 0.5 * Math.sin(time * s.twinkleSpeed * 60 + s.phase));
+    const time = Date.now() * 0.001;
+    const PI2 = Math.PI * 2;
+    ctx.fillStyle = '#fff';
+    for (let i = 0, len = stars.length; i < len; i++) {
+      const s = stars[i];
+      const a = s.alpha * (0.5 + 0.5 * Math.sin(time * s.twinkleSpeed + s.phase));
       ctx.globalAlpha = a;
-      ctx.fillStyle = '#fff';
       ctx.beginPath();
-      ctx.arc(s.x * W, s.y * H, s.size, 0, Math.PI * 2);
+      ctx.arc(s.x * W, s.y * H, s.size, 0, PI2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
@@ -1523,8 +1588,7 @@ function drawComboText(camY) {
 
     ctx.fillStyle = color;
     ctx.globalAlpha = 0.85;
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 12;
+    if (!isMobile) { ctx.shadowColor = color; ctx.shadowBlur = 12; }
     ctx.fillText(`PERFECT x${comboCount}!`, W / 2, prev.y + camY - 30);
     ctx.shadowBlur = 0;
     ctx.restore();
@@ -1541,16 +1605,19 @@ function drawMilestone() {
   ctx.font = `bold ${Math.round(28 * scale)}px 'Segoe UI', sans-serif`;
   ctx.fillStyle = '#ffe066';
   ctx.textAlign = 'center';
-  ctx.shadowColor = 'rgba(255,224,102,0.5)';
-  ctx.shadowBlur = 16;
+  if (!isMobile) { ctx.shadowColor = 'rgba(255,224,102,0.5)'; ctx.shadowBlur = 16; }
   ctx.fillText(milestoneText, W / 2, H * 0.35);
   ctx.shadowBlur = 0;
   ctx.restore();
 }
 
+let lastTiltPct = -1;
+let tiltDotElCached = null;
 function updateTiltIndicator() {
-  const pct = (tiltX + 1) / 2 * 100;
-  document.getElementById('tiltDot').style.left = pct + '%';
+  const pct = ((tiltX + 1) * 50) | 0;
+  if (pct === lastTiltPct) return;
+  lastTiltPct = pct;
+  (tiltDotElCached || (tiltDotElCached = document.getElementById('tiltDot'))).style.left = pct + '%';
 }
 
 // ===== Game Loop =====
