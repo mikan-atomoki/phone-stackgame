@@ -626,7 +626,7 @@ function startGame() {
 function spawnBlock() {
   const prev = blocks[blocks.length - 1];
   const widthShrink = Math.max(0, (blocks.length - 1) * 2);
-  const newWidth = Math.max(MIN_BLOCK_WIDTH, INITIAL_BLOCK_WIDTH - widthShrink);
+  const newWidth = Math.max(MIN_BLOCK_WIDTH, Math.min(prev.w, INITIAL_BLOCK_WIDTH - widthShrink));
 
   // Spawn at random X — spread increases with level
   const level = blocks.length - 1;
