@@ -124,9 +124,131 @@
     color: rgba(255,255,255,0.8);
   }
   #permissionPrompt .icon { font-size: 3rem; margin-bottom: 1rem; }
+
+  /* Name prompt */
+  #namePrompt {
+    position: fixed; inset: 0;
+    background: rgba(10, 10, 46, 0.97);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 20; color: #fff; text-align: center;
+    padding: 2rem;
+  }
+  #namePrompt.hidden { display: none; }
+  #namePrompt .icon { font-size: 3rem; margin-bottom: 1rem; }
+  #namePrompt p {
+    margin-bottom: 1.5rem; line-height: 1.6;
+    color: rgba(255,255,255,0.8);
+  }
+  #namePrompt input {
+    width: 220px; padding: 12px 16px;
+    border: 2px solid rgba(79, 172, 254, 0.5);
+    border-radius: 12px; background: rgba(255,255,255,0.1);
+    color: #fff; font-size: 1.1rem; text-align: center;
+    outline: none; margin-bottom: 1.5rem;
+  }
+  #namePrompt input::placeholder { color: rgba(255,255,255,0.3); }
+  #namePrompt input:focus { border-color: #4facfe; }
+
+  /* Settings screen */
+  #settingsScreen {
+    position: fixed; inset: 0;
+    background: rgba(10, 10, 46, 0.97);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 20; color: #fff; text-align: center;
+    padding: 2rem;
+  }
+  #settingsScreen.hidden { display: none; }
+  #settingsScreen h2 {
+    font-size: 1.8rem; margin-bottom: 2rem;
+    color: #4facfe;
+  }
+  .settings-group {
+    width: 260px; margin-bottom: 1.5rem; text-align: left;
+  }
+  .settings-group label {
+    display: block; font-size: 0.85rem;
+    color: rgba(255,255,255,0.6); margin-bottom: 0.5rem;
+  }
+  .settings-group input[type="text"] {
+    width: 100%; padding: 10px 14px;
+    border: 2px solid rgba(79, 172, 254, 0.5);
+    border-radius: 10px; background: rgba(255,255,255,0.1);
+    color: #fff; font-size: 1rem; outline: none;
+  }
+  .settings-group input[type="text"]:focus { border-color: #4facfe; }
+  .settings-group input[type="range"] {
+    width: 100%; accent-color: #4facfe;
+  }
+  .settings-group .range-val {
+    text-align: center; font-size: 0.9rem;
+    color: rgba(255,255,255,0.7); margin-top: 0.3rem;
+  }
+
+  /* Settings gear button */
+  #settingsBtn {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(255,255,255,0.1);
+    border: none; color: #fff; font-size: 1.5rem;
+    width: 44px; height: 44px; border-radius: 50%;
+    cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+  }
+  #settingsBtn:active { background: rgba(255,255,255,0.2); }
+
+  /* Share button */
+  .btn-share {
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    border: none; color: #fff;
+    padding: 14px 40px; border-radius: 50px;
+    font-size: 1.1rem; font-weight: bold;
+    cursor: pointer; margin-bottom: 12px;
+    box-shadow: 0 4px 20px rgba(67, 233, 123, 0.4);
+  }
+  .btn-share:active { transform: scale(0.95); }
+
+  /* Share toast */
+  #shareToast {
+    position: fixed; bottom: 60px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(67, 233, 123, 0.9);
+    color: #fff; padding: 10px 24px;
+    border-radius: 24px; font-size: 0.9rem;
+    z-index: 30; opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  #shareToast.show { opacity: 1; }
 </style>
 </head>
 <body>
+
+<!-- Name Prompt (first launch) -->
+<div id="namePrompt" class="hidden">
+  <div class="icon">👤</div>
+  <p>あなたの名前を入力してください</p>
+  <input type="text" id="nameInput" placeholder="名前" maxlength="20">
+  <button class="btn" id="nameOkBtn">OK</button>
+</div>
+
+<!-- Settings Screen -->
+<div id="settingsScreen" class="hidden">
+  <h2>⚙ 設定</h2>
+  <div class="settings-group">
+    <label>名前</label>
+    <input type="text" id="settingsName" maxlength="20">
+  </div>
+  <div class="settings-group">
+    <label>傾き感度</label>
+    <input type="range" id="sensitivitySlider" min="0.5" max="6.0" step="0.1" value="3.0">
+    <div class="range-val" id="sensitivityVal">3.0</div>
+  </div>
+  <button class="btn" id="settingsCloseBtn">閉じる</button>
+</div>
+
+<!-- Share toast -->
+<div id="shareToast">コピーしました！</div>
 
 <!-- Permission Prompt (iOS requires user gesture) -->
 <div id="permissionPrompt" class="hidden">
@@ -137,6 +259,7 @@
 
 <!-- Start Screen -->
 <div id="startScreen" class="screen">
+  <button id="settingsBtn">⚙</button>
   <h1>Tilt Tower</h1>
   <p class="subtitle">スマホを傾けてブロックを積め！</p>
   <button class="btn" id="startBtn">START</button>
@@ -148,6 +271,7 @@
   <div class="height-display" id="heightDisplay"></div>
   <div class="score-display" id="finalScore"></div>
   <div class="best-score" id="bestScore"></div>
+  <button class="btn-share" id="shareBtn">📤 シェアする</button>
   <button class="btn" id="retryBtn">RETRY</button>
 </div>
 
@@ -171,7 +295,7 @@
 const GRAVITY = 0.06;
 const DROP_SPEED_INIT = 1.5;
 const DROP_SPEED_INCREMENT = 0.05;
-const TILT_SENSITIVITY = 3.0;
+let TILT_SENSITIVITY = parseFloat(localStorage.getItem('tiltTowerSensitivity') || '3.0');
 const BLOCK_HEIGHT = 40;
 const INITIAL_BLOCK_WIDTH = 160;
 const MIN_BLOCK_WIDTH = 20;
@@ -195,6 +319,7 @@ let shakeAmount = 0;
 let comboCount = 0;
 let hasMotionPermission = false;
 let usingMouse = false; // fallback for desktop
+let playerName = localStorage.getItem('tiltTowerName') || '';
 
 // ===== Colors =====
 const BLOCK_COLORS = [
@@ -224,11 +349,75 @@ function init() {
   document.getElementById('retryBtn').addEventListener('click', startGame);
   document.getElementById('permissionBtn').addEventListener('click', grantPermission);
 
+  // Name prompt
+  if (!playerName) {
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('namePrompt').classList.remove('hidden');
+  }
+  document.getElementById('nameOkBtn').addEventListener('click', submitName);
+  document.getElementById('nameInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitName();
+  });
+
+  // Settings
+  document.getElementById('settingsBtn').addEventListener('click', openSettings);
+  document.getElementById('settingsCloseBtn').addEventListener('click', closeSettings);
+  document.getElementById('sensitivitySlider').addEventListener('input', (e) => {
+    document.getElementById('sensitivityVal').textContent = parseFloat(e.target.value).toFixed(1);
+  });
+
+  // Share
+  document.getElementById('shareBtn').addEventListener('click', shareScore);
+
   // Desktop fallback: mouse/touch
   setupDesktopFallback();
 
   // Loop
   requestAnimationFrame(loop);
+}
+
+function submitName() {
+  const input = document.getElementById('nameInput');
+  const name = input.value.trim();
+  if (!name) return;
+  playerName = name;
+  localStorage.setItem('tiltTowerName', playerName);
+  document.getElementById('namePrompt').classList.add('hidden');
+  document.getElementById('startScreen').classList.remove('hidden');
+}
+
+function openSettings() {
+  document.getElementById('settingsName').value = playerName;
+  document.getElementById('sensitivitySlider').value = TILT_SENSITIVITY;
+  document.getElementById('sensitivityVal').textContent = TILT_SENSITIVITY.toFixed(1);
+  document.getElementById('settingsScreen').classList.remove('hidden');
+}
+
+function closeSettings() {
+  const name = document.getElementById('settingsName').value.trim();
+  if (name) {
+    playerName = name;
+    localStorage.setItem('tiltTowerName', playerName);
+  }
+  TILT_SENSITIVITY = parseFloat(document.getElementById('sensitivitySlider').value);
+  localStorage.setItem('tiltTowerSensitivity', TILT_SENSITIVITY.toFixed(1));
+  document.getElementById('settingsScreen').classList.add('hidden');
+}
+
+function shareScore() {
+  const placedCount = blocks.length - 1;
+  const heightM = (placedCount * BLOCK_HEIGHT / 100).toFixed(1);
+  const text = `${playerName}さんは${heightM}mまで積んだ！（スコア: ${score}）\nあなたも挑戦してみませんか？🏗️\nhttps://mikan-atomoki.github.io/phone-stackgame/`;
+
+  if (navigator.share) {
+    navigator.share({ text }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => {
+      const toast = document.getElementById('shareToast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }).catch(() => {});
+  }
 }
 
 function resize() {
