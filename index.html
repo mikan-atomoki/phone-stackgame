@@ -185,6 +185,26 @@
     text-align: center; font-size: 0.9rem;
     color: rgba(255,255,255,0.7); margin-top: 0.3rem;
   }
+  .toggle-row {
+    display: flex; align-items: center;
+    justify-content: space-between;
+  }
+  .toggle-row label { margin-bottom: 0; }
+  .toggle {
+    position: relative; width: 50px; height: 28px;
+    background: rgba(255,255,255,0.15); border-radius: 14px;
+    cursor: pointer; transition: background 0.3s;
+    flex-shrink: 0;
+  }
+  .toggle.on { background: #4facfe; }
+  .toggle::after {
+    content: ''; position: absolute;
+    top: 3px; left: 3px;
+    width: 22px; height: 22px;
+    background: #fff; border-radius: 50%;
+    transition: transform 0.3s;
+  }
+  .toggle.on::after { transform: translateX(22px); }
 
   /* Settings gear button */
   #settingsBtn {
@@ -220,6 +240,37 @@
     pointer-events: none;
   }
   #shareToast.show { opacity: 1; }
+
+  /* Start screen best & greeting */
+  .start-best {
+    color: rgba(255,255,255,0.5); font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .start-greeting {
+    color: rgba(255,255,255,0.5); font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .start-greeting .name { color: rgba(255,255,255,0.85); }
+
+  /* START button pulse */
+  @keyframes btnPulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(79, 172, 254, 0.4); }
+    50% { box-shadow: 0 4px 35px rgba(79, 172, 254, 0.7); }
+  }
+  #startBtn { animation: btnPulse 2s ease-in-out infinite; }
+
+  /* NEW BEST badge */
+  @keyframes newBestPulse {
+    0%, 100% { transform: scale(1); text-shadow: 0 0 10px rgba(255, 224, 102, 0.5); }
+    50% { transform: scale(1.1); text-shadow: 0 0 25px rgba(255, 224, 102, 0.9); }
+  }
+  #newBestBadge {
+    color: #ffe066; font-size: 1.6rem; font-weight: bold;
+    animation: newBestPulse 1s ease-in-out infinite;
+    margin-bottom: 0.5rem;
+    display: none;
+  }
+  #newBestBadge.show { display: block; }
 </style>
 </head>
 <body>
@@ -244,6 +295,12 @@
     <input type="range" id="sensitivitySlider" min="0.5" max="6.0" step="0.1" value="3.0">
     <div class="range-val" id="sensitivityVal">3.0</div>
   </div>
+  <div class="settings-group" id="vibrationGroup" style="display:none;">
+    <div class="toggle-row">
+      <label>バイブレーション</label>
+      <div class="toggle" id="vibrationToggle"></div>
+    </div>
+  </div>
   <button class="btn" id="settingsCloseBtn">閉じる</button>
 </div>
 
@@ -262,12 +319,15 @@
   <button id="settingsBtn">⚙</button>
   <h1>Tilt Tower</h1>
   <p class="subtitle">スマホを傾けてブロックを積め！</p>
+  <p class="start-best" id="startBest"></p>
+  <p class="start-greeting" id="startGreeting"></p>
   <button class="btn" id="startBtn">START</button>
 </div>
 
 <!-- Game Over Screen -->
 <div id="gameOverScreen" class="screen hidden">
   <h2>GAME OVER</h2>
+  <div id="newBestBadge">🏆 NEW BEST!</div>
   <div class="height-display" id="heightDisplay"></div>
   <div class="score-display" id="finalScore"></div>
   <div class="best-score" id="bestScore"></div>
@@ -278,6 +338,7 @@
 <!-- HUD -->
 <div id="hud" style="display:none;">
   <div><div class="label">SCORE</div><div class="value" id="scoreVal">0</div></div>
+  <div style="text-align:center;"><div class="label">HEIGHT</div><div class="value" id="heightVal">0m</div></div>
   <div style="text-align:right;"><div class="label">BLOCKS</div><div class="value" id="blockCount">0</div></div>
 </div>
 
@@ -320,6 +381,8 @@ let comboCount = 0;
 let hasMotionPermission = false;
 let usingMouse = false; // fallback for desktop
 let playerName = localStorage.getItem('tiltTowerName') || '';
+let vibrationSupported = typeof navigator.vibrate === 'function';
+let vibrationEnabled = vibrationSupported && localStorage.getItem('tiltTowerVibration') !== 'off';
 
 // ===== Colors =====
 const BLOCK_COLORS = [
@@ -337,6 +400,10 @@ function getBlockColor(i) {
   return BLOCK_COLORS[i % BLOCK_COLORS.length];
 }
 
+function vibrate(pattern) {
+  if (vibrationSupported && vibrationEnabled) navigator.vibrate(pattern);
+}
+
 // ===== Init =====
 function init() {
   canvas = document.getElementById('gameCanvas');
@@ -348,6 +415,9 @@ function init() {
   document.getElementById('startBtn').addEventListener('click', requestMotionAndStart);
   document.getElementById('retryBtn').addEventListener('click', startGame);
   document.getElementById('permissionBtn').addEventListener('click', grantPermission);
+
+  // Start screen info
+  updateStartScreen();
 
   // Name prompt
   if (!playerName) {
@@ -364,6 +434,17 @@ function init() {
   document.getElementById('settingsCloseBtn').addEventListener('click', closeSettings);
   document.getElementById('sensitivitySlider').addEventListener('input', (e) => {
     document.getElementById('sensitivityVal').textContent = parseFloat(e.target.value).toFixed(1);
+  });
+  if (vibrationSupported) {
+    document.getElementById('vibrationGroup').style.display = '';
+    document.getElementById('vibrationToggle').classList.toggle('on', vibrationEnabled);
+  }
+  document.getElementById('vibrationToggle').addEventListener('click', () => {
+    const toggle = document.getElementById('vibrationToggle');
+    toggle.classList.toggle('on');
+    if (toggle.classList.contains('on')) {
+      navigator.vibrate(200);
+    }
   });
 
   // Share
@@ -384,12 +465,27 @@ function submitName() {
   localStorage.setItem('tiltTowerName', playerName);
   document.getElementById('namePrompt').classList.add('hidden');
   document.getElementById('startScreen').classList.remove('hidden');
+  updateStartScreen();
+}
+
+function updateStartScreen() {
+  const bestEl = document.getElementById('startBest');
+  const greetEl = document.getElementById('startGreeting');
+  bestEl.textContent = bestScoreVal > 0 ? `BEST: ${bestScoreVal}` : '';
+  if (playerName) {
+    greetEl.innerHTML = `おかえり、<span class="name">${playerName}</span>さん`;
+  } else {
+    greetEl.textContent = '';
+  }
 }
 
 function openSettings() {
   document.getElementById('settingsName').value = playerName;
   document.getElementById('sensitivitySlider').value = TILT_SENSITIVITY;
   document.getElementById('sensitivityVal').textContent = TILT_SENSITIVITY.toFixed(1);
+  if (vibrationSupported) {
+    document.getElementById('vibrationToggle').classList.toggle('on', vibrationEnabled);
+  }
   document.getElementById('settingsScreen').classList.remove('hidden');
 }
 
@@ -401,7 +497,12 @@ function closeSettings() {
   }
   TILT_SENSITIVITY = parseFloat(document.getElementById('sensitivitySlider').value);
   localStorage.setItem('tiltTowerSensitivity', TILT_SENSITIVITY.toFixed(1));
+  if (vibrationSupported) {
+    vibrationEnabled = document.getElementById('vibrationToggle').classList.contains('on');
+    localStorage.setItem('tiltTowerVibration', vibrationEnabled ? 'on' : 'off');
+  }
   document.getElementById('settingsScreen').classList.add('hidden');
+  updateStartScreen();
 }
 
 function shareScore() {
@@ -575,11 +676,13 @@ function placeBlock() {
     spawnPerfectParticles(currentBlock);
     // Slight width bonus on perfect
     currentBlock.w = Math.min(currentBlock.w + 4, prev.w);
+    vibrate([40, 30, 40]);
   } else {
     comboCount = 0;
     currentBlock.x = overlapCenter;
     currentBlock.w = overlap;
     score += Math.round(overlap / 2);
+    vibrate(60);
 
     // Spawn falling-off piece particles
     spawnSliceParticles(currentBlock, prev, dx);
@@ -627,12 +730,13 @@ function gameOver() {
   shakeAmount = 15;
 
   // Vibrate
-  if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
+  vibrate([100, 50, 200]);
 
   const placedCount = blocks.length - 1;
   const heightM = (placedCount * BLOCK_HEIGHT / 100).toFixed(1);
 
-  if (score > bestScoreVal) {
+  const isNewBest = score > bestScoreVal;
+  if (isNewBest) {
     bestScoreVal = score;
     localStorage.setItem('tiltTowerBest', bestScoreVal);
   }
@@ -642,14 +746,23 @@ function gameOver() {
     document.getElementById('tiltIndicator').style.display = 'none';
     document.getElementById('heightDisplay').textContent = `${placedCount} blocks (${heightM}m)`;
     document.getElementById('finalScore').textContent = score;
-    document.getElementById('bestScore').textContent = `BEST: ${bestScoreVal}`;
+    const newBestBadge = document.getElementById('newBestBadge');
+    if (isNewBest) {
+      newBestBadge.classList.add('show');
+      document.getElementById('bestScore').textContent = 'NEW BEST!';
+    } else {
+      newBestBadge.classList.remove('show');
+      document.getElementById('bestScore').textContent = `BEST: ${bestScoreVal}`;
+    }
     document.getElementById('gameOverScreen').classList.remove('hidden');
+    updateStartScreen();
   }, 800);
 }
 
 function updateHUD() {
   document.getElementById('scoreVal').textContent = score;
   document.getElementById('blockCount').textContent = blocks.length - 1;
+  document.getElementById('heightVal').textContent = ((blocks.length - 1) * BLOCK_HEIGHT / 100).toFixed(1) + 'm';
 }
 
 // ===== Particles =====
