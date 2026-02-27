@@ -661,14 +661,51 @@
   .shop-card-badge.seasonal { background: #ff6b9d; }
   .shop-preview {
     display: flex; gap: 3px;
-    justify-content: center;
+    justify-content: center; align-items: center;
     margin-bottom: 8px;
-    min-height: 24px;
+    min-height: 48px;
     flex-wrap: wrap;
   }
   .shop-preview-swatch {
     width: 20px; height: 20px;
     border-radius: 4px;
+  }
+  /* Block preview: mini tower */
+  .shop-preview-tower {
+    display: flex; flex-direction: column-reverse;
+    align-items: center; gap: 1px;
+  }
+  .shop-preview-tower-block {
+    border-radius: 3px; height: 8px;
+  }
+  /* Background preview: gradient rectangle */
+  .shop-preview-bg {
+    width: 56px; height: 44px;
+    border-radius: 6px;
+    border: 1px solid var(--card-border);
+  }
+  /* Effect preview: shape icons */
+  .shop-preview-effects {
+    display: flex; gap: 5px; justify-content: center; align-items: center;
+  }
+  .shop-preview-shape { width: 16px; height: 16px; }
+  /* UI theme preview: mini UI mockup */
+  .shop-preview-ui {
+    width: 56px; height: 44px;
+    border-radius: 6px; padding: 4px;
+    border: 1px solid var(--card-border);
+    display: flex; flex-direction: column;
+    gap: 3px; align-items: center; justify-content: center;
+    background: var(--bg-primary);
+  }
+  .shop-preview-ui-bar {
+    width: 100%; height: 5px; border-radius: 2px;
+  }
+  .shop-preview-ui-btn {
+    width: 60%; height: 8px; border-radius: 3px;
+  }
+  .shop-preview-ui-dot {
+    width: 8px; height: 8px; border-radius: 50%;
   }
   .shop-card-name {
     font-size: 0.85rem; font-weight: bold;
@@ -715,8 +752,9 @@
   .purchase-box h3 { font-size: 1.1rem; margin-bottom: 8px; }
   .purchase-preview {
     display: flex; gap: 3px;
-    justify-content: center;
+    justify-content: center; align-items: center;
     margin-bottom: 12px;
+    min-height: 48px;
   }
   .purchase-price {
     color: var(--coin-gold);
@@ -870,6 +908,26 @@
     transition: transform 0.1s;
   }
   .btn-ranking:active { transform: scale(0.95); }
+  .btn-home {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text-muted);
+    padding: 10px 30px; border-radius: 12px;
+    font-size: 0.9rem; cursor: pointer;
+    margin-top: 4px;
+    transition: transform 0.1s;
+  }
+  .btn-home:active { transform: scale(0.95); }
+  #rankingSubmitSection .ranking-retry-btn {
+    background: var(--accent); color: #fff;
+    border: none; padding: 4px 14px; border-radius: 8px;
+    font-size: 0.8rem; cursor: pointer; margin-left: 6px;
+  }
+  #rankingSubmitSection .ranking-retry-btn:active { transform: scale(0.95); }
+  #rankingSubmitSection .ranking-name-link {
+    color: var(--accent); text-decoration: underline;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -1020,8 +1078,10 @@
   <div id="streakMultiplier"></div>
   <div class="best-score" id="bestScore"></div>
   <button class="btn-share" id="shareBtn">Share</button>
+  <div id="rankingSubmitSection" style="font-size:0.85rem;margin-bottom:8px;min-height:1.4em;color:var(--text-muted);"></div>
   <button class="btn-ranking" id="goRankingBtn">🏆 ランキング</button>
   <button class="btn" id="retryBtn">RETRY</button>
+  <button class="btn-home" id="goHomeBtn">🏠 ホーム</button>
 </div>
 
 <!-- HUD -->
@@ -1526,6 +1586,66 @@ function getCatalogForTab(tab) {
   return BLOCK_SKINS;
 }
 
+function generatePreview(item, category) {
+  if (category === 'blocks' && item.colors) {
+    // Mini tower: 4 stacked blocks
+    const samples = item.colors.slice(0, 4);
+    const widths = [36, 32, 28, 24];
+    const blocks = samples.map((c, i) => {
+      const c0 = Array.isArray(c) ? c[0] : c;
+      const c1 = Array.isArray(c) ? c[1] : c;
+      return `<div class="shop-preview-tower-block" style="width:${widths[i]}px;background:linear-gradient(135deg,${c0},${c1})"></div>`;
+    }).join('');
+    return `<div class="shop-preview-tower">${blocks}</div>`;
+  }
+  if (category === 'backgrounds' && item.previewColors) {
+    const cols = item.previewColors;
+    const grad = cols.length >= 2
+      ? `linear-gradient(180deg,${cols[0]},${cols[cols.length-1]})`
+      : cols[0];
+    return `<div class="shop-preview-bg" style="background:${grad}"></div>`;
+  }
+  if (category === 'effects') {
+    const shape = item.shape || 'circle';
+    const cols = (item.previewColors || item.colors || []).slice(0, 4);
+    const svgShapes = {
+      circle: (c) => `<svg class="shop-preview-shape" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="${c}"/></svg>`,
+      star: (c) => `<svg class="shop-preview-shape" viewBox="0 0 16 16"><polygon points="8,1 10,6 15,6 11,9.5 12.5,15 8,11.5 3.5,15 5,9.5 1,6 6,6" fill="${c}"/></svg>`,
+      petal: (c) => `<svg class="shop-preview-shape" viewBox="0 0 16 16"><ellipse cx="8" cy="6" rx="4" ry="7" fill="${c}" transform="rotate(15,8,8)"/></svg>`,
+      snowflake: (c) => `<svg class="shop-preview-shape" viewBox="0 0 16 16"><line x1="8" y1="1" x2="8" y2="15" stroke="${c}" stroke-width="1.5"/><line x1="1" y1="8" x2="15" y2="8" stroke="${c}" stroke-width="1.5"/><line x1="3" y1="3" x2="13" y2="13" stroke="${c}" stroke-width="1.2"/><line x1="13" y1="3" x2="3" y2="13" stroke="${c}" stroke-width="1.2"/></svg>`,
+      square: (c) => `<svg class="shop-preview-shape" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2" fill="${c}"/></svg>`,
+    };
+    const gen = svgShapes[shape] || svgShapes.circle;
+    const shapes = cols.map(c => gen(c)).join('');
+    return `<div class="shop-preview-effects">${shapes}</div>`;
+  }
+  if (category === 'uiThemes') {
+    const accent = (item.vars && item.vars['--accent']) || '#4facfe';
+    const coin = (item.vars && item.vars['--coin-gold']) || '#FFD700';
+    return `<div class="shop-preview-ui">
+      <div class="shop-preview-ui-bar" style="background:${accent}"></div>
+      <div class="shop-preview-ui-btn" style="background:${accent}"></div>
+      <div class="shop-preview-ui-dot" style="background:${coin}"></div>
+    </div>`;
+  }
+  // Fallback: swatches
+  const src = item.colors || item.previewColors || [];
+  const samples = (item.colors || []).slice(0, 6);
+  if (samples.length > 0) {
+    return samples.map(c => {
+      const c0 = Array.isArray(c) ? c[0] : c;
+      const c1 = Array.isArray(c) ? c[1] : c;
+      return `<div class="shop-preview-swatch" style="background:linear-gradient(135deg,${c0},${c1})"></div>`;
+    }).join('');
+  }
+  if (item.previewColors) {
+    return item.previewColors.map(c =>
+      `<div class="shop-preview-swatch" style="background:${c}"></div>`
+    ).join('');
+  }
+  return '';
+}
+
 function getCategoryForTab(tab) { return tab; }
 
 function openShop() {
@@ -1592,22 +1712,7 @@ function buildShopCard(id, item, category, owned, equipped) {
   if (item.rotation && rotation.includes(id) && !isOwned) badge = '<div class="shop-card-badge">LIMITED</div>';
   else if (item.seasonal && !isOwned) badge = '<div class="shop-card-badge seasonal">季節限定</div>';
 
-  let preview = '';
-  const previewSrc = item.colors || item.previewColors;
-  if (previewSrc) {
-    const samples = (item.colors || []).slice(0, 6);
-    if (samples.length > 0) {
-      preview = samples.map(c => {
-        const c0 = Array.isArray(c) ? c[0] : c;
-        const c1 = Array.isArray(c) ? c[1] : c;
-        return `<div class="shop-preview-swatch" style="background:linear-gradient(135deg,${c0},${c1})"></div>`;
-      }).join('');
-    } else if (item.previewColors) {
-      preview = item.previewColors.map(c =>
-        `<div class="shop-preview-swatch" style="background:${c}"></div>`
-      ).join('');
-    }
-  }
+  const preview = generatePreview(item, category);
 
   let priceHTML, btnHTML;
   if (item.price === 0) {
@@ -1644,19 +1749,7 @@ function showPurchaseDialog(category, id) {
 
   document.getElementById('purchaseItemName').textContent = item.name;
   const previewEl = document.getElementById('purchasePreview');
-  const previewSrc = item.colors || item.previewColors || [];
-  const samples = (item.colors || []).slice(0, 6);
-  if (samples.length > 0) {
-    previewEl.innerHTML = samples.map(c => {
-      const c0 = Array.isArray(c) ? c[0] : c;
-      const c1 = Array.isArray(c) ? c[1] : c;
-      return `<div class="shop-preview-swatch" style="background:linear-gradient(135deg,${c0},${c1})"></div>`;
-    }).join('');
-  } else if (item.previewColors) {
-    previewEl.innerHTML = item.previewColors.map(c =>
-      `<div class="shop-preview-swatch" style="background:${c}"></div>`
-    ).join('');
-  }
+  previewEl.innerHTML = generatePreview(item, category);
   document.getElementById('purchasePrice').textContent = `🪙 ${item.price}`;
   document.getElementById('purchaseBalance').textContent = `残高: 🪙 ${coinBalance} → ${coinBalance - item.price}`;
   document.getElementById('purchaseDialog').classList.remove('hidden');
@@ -1873,6 +1966,7 @@ function init() {
   // Ranking
   document.getElementById('rankingBtn').addEventListener('click', () => { sfxButton(); openLeaderboard(); });
   document.getElementById('goRankingBtn').addEventListener('click', () => { sfxButton(); openLeaderboard(); });
+  document.getElementById('goHomeBtn').addEventListener('click', () => { sfxButton(); goHome(); });
   document.getElementById('lbBackBtn').addEventListener('click', () => { sfxButton(); closeLeaderboard(); });
   document.getElementById('sensitivitySlider').addEventListener('input', (e) => {
     document.getElementById('sensitivityVal').textContent = parseFloat(e.target.value).toFixed(1);
@@ -1923,6 +2017,7 @@ function submitName() {
   if (!name) return;
   playerName = name;
   localStorage.setItem('tiltTowerName', playerName);
+  reserveName(playerName);
   document.getElementById('namePrompt').classList.add('hidden');
   document.getElementById('startScreen').classList.remove('hidden');
   updateStartScreen();
@@ -1966,6 +2061,7 @@ function closeSettings() {
   if (name) {
     playerName = name;
     localStorage.setItem('tiltTowerName', playerName);
+    reserveName(playerName);
   }
   TILT_SENSITIVITY = parseFloat(document.getElementById('sensitivitySlider').value);
   localStorage.setItem('tiltTowerSensitivity', TILT_SENSITIVITY.toFixed(1));
@@ -2061,6 +2157,17 @@ function setupDesktopFallback() {
       tiltX = Math.max(-1, Math.min(1, (e.touches[0].clientX - W / 2) / (W * 0.35)));
     }
   }, { passive: true });
+}
+
+function goHome() {
+  document.getElementById('gameOverScreen').classList.add('hidden');
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('hudCoins').style.display = 'none';
+  document.getElementById('tiltIndicator').style.display = 'none';
+  document.getElementById('comboGauge').classList.remove('show');
+  document.getElementById('startScreen').classList.remove('hidden');
+  gameState = 'start';
+  updateStartScreen();
 }
 
 // ===== Game Logic =====
@@ -2363,9 +2470,34 @@ function gameOver() {
     document.getElementById('gameOverScreen').classList.remove('hidden');
     updateStartScreen();
 
-    // Firebase: submit score if new best
+    // Firebase: submit score with feedback
+    const rankSection = document.getElementById('rankingSubmitSection');
     if (isNewBest && playerName) {
-      submitScore(score, placedCount, peakCombo);
+      rankSection.innerHTML = '⏳ ランキング送信中...';
+      submitScore(score, placedCount, peakCombo).then(ok => {
+        if (ok) {
+          rankSection.innerHTML = '<span style="color:#2ecc71">✓ ランキングに登録しました！</span>';
+        } else {
+          rankSection.innerHTML = '<span style="color:#ff4757">送信に失敗しました</span> <button class="ranking-retry-btn" id="rankingRetryBtn">再試行</button>';
+          document.getElementById('rankingRetryBtn').addEventListener('click', () => {
+            rankSection.innerHTML = '⏳ ランキング送信中...';
+            submitScore(score, placedCount, peakCombo).then(ok2 => {
+              rankSection.innerHTML = ok2
+                ? '<span style="color:#2ecc71">✓ ランキングに登録しました！</span>'
+                : '<span style="color:#ff4757">送信に失敗しました</span>';
+            });
+          });
+        }
+      });
+    } else if (isNewBest && !playerName) {
+      rankSection.innerHTML = '<span class="ranking-name-link" id="rankingSetName">名前を設定</span>するとランキングに登録できます';
+      document.getElementById('rankingSetName').addEventListener('click', () => {
+        sfxButton();
+        document.getElementById('gameOverScreen').classList.add('hidden');
+        document.getElementById('namePrompt').classList.remove('hidden');
+      });
+    } else {
+      rankSection.innerHTML = '';
     }
   }, 800);
 }
@@ -3055,13 +3187,13 @@ async function loadFirebase() {
 }
 
 async function submitScore(scoreVal, placedCount, peakComboVal) {
-  if (!await loadFirebase()) return;
-  if (!firebaseUser || !playerName) return;
+  if (!await loadFirebase()) return false;
+  if (!firebaseUser || !playerName) return false;
   try {
     const fsModule = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
     const docRef = fsModule.doc(firebaseDb, 'leaderboard', firebaseUser.uid);
     const existing = await fsModule.getDoc(docRef);
-    if (existing.exists() && existing.data().score >= scoreVal) return; // Only update if higher
+    if (existing.exists() && existing.data().score >= scoreVal) return true; // Already higher, still success
     const heightM = parseFloat((placedCount * BLOCK_HEIGHT / 100).toFixed(1));
     await fsModule.setDoc(docRef, {
       name: playerName,
@@ -3072,8 +3204,12 @@ async function submitScore(scoreVal, placedCount, peakComboVal) {
       uid: firebaseUser.uid,
       updatedAt: fsModule.serverTimestamp(),
     });
+    // Also reserve the name
+    reserveName(playerName);
+    return true;
   } catch (e) {
     console.error('Score submit error:', e);
+    return false;
   }
 }
 
