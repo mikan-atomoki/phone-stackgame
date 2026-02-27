@@ -508,6 +508,368 @@
     text-align: right;
     opacity: 0.6;
   }
+
+  /* ===== Shop Button (Start Screen) ===== */
+  #shopBtn {
+    position: absolute; top: 14px; left: 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--coin-gold); font-size: 1.1rem;
+    width: 42px; height: 42px; border-radius: 10px;
+    cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: background 0.2s;
+  }
+  #shopBtn:active { background: var(--input-bg); }
+  .shop-notify-dot {
+    position: absolute; top: -2px; right: -2px;
+    width: 8px; height: 8px;
+    background: #ff4757; border-radius: 50%;
+    display: none;
+  }
+  .shop-notify-dot.show { display: block; }
+
+  /* ===== Ranking Button (Start Screen) ===== */
+  #rankingBtn {
+    position: absolute; top: 62px; right: 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--text-muted); font-size: 0.85rem;
+    width: 42px; height: 42px; border-radius: 10px;
+    cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: background 0.2s;
+  }
+  #rankingBtn:active { background: var(--input-bg); }
+
+  /* ===== Shop Screen ===== */
+  #shopScreen {
+    position: fixed; inset: 0;
+    background: var(--bg-overlay);
+    backdrop-filter: blur(8px);
+    display: flex; flex-direction: column;
+    align-items: center;
+    z-index: 20;
+    padding: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #shopScreen.hidden { display: none; }
+  .shop-header {
+    position: sticky; top: 0;
+    width: 100%;
+    background: var(--bg-overlay);
+    backdrop-filter: blur(12px);
+    padding: 14px 18px;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    z-index: 2;
+    border-bottom: 1px solid var(--card-border);
+  }
+  .shop-back-btn {
+    background: none; border: none;
+    color: var(--text-primary);
+    font-size: 1.1rem; cursor: pointer;
+    padding: 6px 12px;
+  }
+  .shop-title {
+    font-size: 1.2rem; font-weight: bold;
+    color: var(--text-primary);
+  }
+  .shop-coins {
+    color: var(--coin-gold);
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+  }
+  .shop-tabs {
+    display: flex; width: 100%;
+    border-bottom: 1px solid var(--card-border);
+    background: var(--bg-overlay);
+    position: sticky; top: 52px;
+    z-index: 2;
+  }
+  .shop-tab {
+    flex: 1; padding: 10px 0;
+    background: none; border: none;
+    color: var(--text-muted);
+    font-size: 0.75rem; cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .shop-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .shop-rotation-section {
+    width: 100%; max-width: 400px;
+    padding: 12px 14px 0;
+  }
+  .shop-rotation-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .shop-rotation-title {
+    font-size: 0.8rem; font-weight: bold;
+    color: var(--coin-gold);
+    letter-spacing: 0.5px;
+  }
+  .shop-rotation-timer {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+  .shop-own-count {
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    padding: 8px 0 4px;
+  }
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 10px 14px 80px;
+    width: 100%;
+    max-width: 400px;
+  }
+  .shop-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+    position: relative;
+    transition: transform 0.1s;
+  }
+  .shop-card:active { transform: scale(0.97); }
+  .shop-card.equipped {
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+  .shop-card-badge {
+    position: absolute; top: 8px; left: 8px;
+    background: #ff4757; color: #fff;
+    font-size: 0.55rem; font-weight: bold;
+    padding: 2px 6px; border-radius: 6px;
+    letter-spacing: 0.5px;
+  }
+  .shop-card-badge.seasonal { background: #ff6b9d; }
+  .shop-preview {
+    display: flex; gap: 3px;
+    justify-content: center;
+    margin-bottom: 8px;
+    min-height: 24px;
+    flex-wrap: wrap;
+  }
+  .shop-preview-swatch {
+    width: 20px; height: 20px;
+    border-radius: 4px;
+  }
+  .shop-card-name {
+    font-size: 0.85rem; font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .shop-card-price {
+    font-size: 0.8rem;
+    color: var(--coin-gold);
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  .shop-card-price.insufficient { color: #ff4757; }
+  .shop-card-btn {
+    width: 100%; padding: 7px 0;
+    border-radius: 8px; border: none;
+    font-size: 0.8rem; font-weight: bold;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .shop-card-btn.buy { background: var(--coin-gold); color: #1a1a2e; }
+  .shop-card-btn.buy:disabled { background: var(--toggle-off); color: var(--text-muted); cursor: default; }
+  .shop-card-btn.equip { background: var(--accent); color: #fff; }
+  .shop-card-btn.equipped-btn {
+    background: var(--card-bg); color: var(--accent);
+    border: 1px solid var(--accent); cursor: default;
+  }
+
+  /* ===== Purchase Confirm Dialog ===== */
+  #purchaseDialog {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex; align-items: center;
+    justify-content: center;
+    z-index: 25; padding: 2rem;
+  }
+  #purchaseDialog.hidden { display: none; }
+  .purchase-box {
+    background: var(--bg-primary);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 24px; text-align: center;
+    max-width: 280px; width: 100%;
+  }
+  .purchase-box h3 { font-size: 1.1rem; margin-bottom: 8px; }
+  .purchase-preview {
+    display: flex; gap: 3px;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .purchase-price {
+    color: var(--coin-gold);
+    font-size: 1.2rem; font-weight: bold;
+    margin-bottom: 4px;
+  }
+  .purchase-balance {
+    color: var(--text-muted);
+    font-size: 0.8rem; margin-bottom: 16px;
+  }
+  .purchase-btns { display: flex; gap: 10px; }
+  .purchase-btns button {
+    flex: 1; padding: 10px; border-radius: 10px;
+    border: none; font-size: 0.95rem;
+    font-weight: bold; cursor: pointer;
+  }
+  .purchase-cancel-btn {
+    background: var(--card-bg); color: var(--text-primary);
+    border: 1px solid var(--card-border) !important;
+  }
+  .purchase-confirm-btn { background: var(--coin-gold); color: #1a1a2e; }
+
+  /* ===== Leaderboard Screen ===== */
+  #leaderboardScreen {
+    position: fixed; inset: 0;
+    background: var(--bg-overlay);
+    backdrop-filter: blur(8px);
+    display: flex; flex-direction: column;
+    align-items: center;
+    z-index: 20;
+    padding: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #leaderboardScreen.hidden { display: none; }
+  .lb-header {
+    position: sticky; top: 0;
+    width: 100%;
+    background: var(--bg-overlay);
+    backdrop-filter: blur(12px);
+    padding: 14px 18px;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    z-index: 2;
+    border-bottom: 1px solid var(--card-border);
+  }
+  .lb-back-btn {
+    background: none; border: none;
+    color: var(--text-primary);
+    font-size: 1.1rem; cursor: pointer;
+    padding: 6px 12px;
+  }
+  .lb-title {
+    font-size: 1.2rem; font-weight: bold;
+    color: var(--text-primary);
+  }
+  .lb-my-rank {
+    width: 100%; max-width: 400px;
+    padding: 12px 18px;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--card-border);
+    text-align: center;
+  }
+  .lb-my-rank-label {
+    font-size: 0.7rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .lb-my-rank-score {
+    font-size: 1.3rem; font-weight: bold;
+    color: var(--accent);
+    font-family: 'Courier New', monospace;
+  }
+  .lb-table {
+    width: 100%; max-width: 400px;
+    padding: 0 14px 80px;
+  }
+  .lb-row {
+    display: flex; align-items: center;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--card-border);
+    gap: 10px;
+  }
+  .lb-row.me {
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+  }
+  .lb-rank {
+    width: 32px; text-align: center;
+    font-weight: bold; font-size: 0.9rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .lb-rank.gold { color: #ffd700; }
+  .lb-rank.silver { color: #c0c0c0; }
+  .lb-rank.bronze { color: #cd7f32; }
+  .lb-name {
+    flex: 1; font-size: 0.9rem;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .lb-score-col {
+    text-align: right; font-weight: bold;
+    font-size: 0.9rem; color: var(--accent);
+    font-family: 'Courier New', monospace;
+    flex-shrink: 0;
+  }
+  .lb-height-col {
+    text-align: right; font-size: 0.75rem;
+    color: var(--text-muted);
+    width: 48px; flex-shrink: 0;
+  }
+  .lb-loading, .lb-error, .lb-empty {
+    text-align: center; padding: 40px 20px;
+    color: var(--text-muted); font-size: 0.9rem;
+  }
+  .lb-error { color: #ff4757; }
+
+  /* ===== FOMO / Start Screen Extras ===== */
+  .start-skins-info {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+  .start-fomo-text {
+    font-size: 0.75rem;
+    color: var(--coin-gold);
+    margin-bottom: 0.8rem;
+    opacity: 0.8;
+  }
+  .start-equipped-row {
+    display: flex; gap: 4px;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+  .start-equipped-swatch {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+  }
+  /* Game over ranking btn */
+  .btn-ranking {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text-muted);
+    padding: 10px 30px; border-radius: 12px;
+    font-size: 0.9rem; cursor: pointer;
+    margin-bottom: 8px;
+    transition: transform 0.1s;
+  }
+  .btn-ranking:active { transform: scale(0.95); }
 </style>
 </head>
 <body>
@@ -555,6 +917,60 @@
   <button class="btn" id="settingsCloseBtn" style="margin-top:12px;">閉じる</button>
 </div>
 
+<!-- Shop Screen -->
+<div id="shopScreen" class="hidden">
+  <div class="shop-header">
+    <button class="shop-back-btn" id="shopBackBtn">← 戻る</button>
+    <span class="shop-title">ショップ</span>
+    <span class="shop-coins">🪙 <span id="shopCoins">0</span></span>
+  </div>
+  <div class="shop-tabs">
+    <button class="shop-tab active" data-tab="blocks">ブロック</button>
+    <button class="shop-tab" data-tab="backgrounds">背景</button>
+    <button class="shop-tab" data-tab="effects">エフェクト</button>
+    <button class="shop-tab" data-tab="uiThemes">UI</button>
+  </div>
+  <div id="shopRotationSection" class="shop-rotation-section" style="display:none;">
+    <div class="shop-rotation-header">
+      <span class="shop-rotation-title">★ 今週のおすすめ</span>
+      <span class="shop-rotation-timer" id="rotationTimer"></span>
+    </div>
+    <div class="shop-grid" id="shopRotationGrid"></div>
+  </div>
+  <div class="shop-own-count" id="shopOwnCount"></div>
+  <div class="shop-grid" id="shopGrid"></div>
+</div>
+
+<!-- Purchase Dialog -->
+<div id="purchaseDialog" class="hidden">
+  <div class="purchase-box">
+    <h3 id="purchaseItemName"></h3>
+    <div class="purchase-preview" id="purchasePreview"></div>
+    <div class="purchase-price" id="purchasePrice"></div>
+    <div class="purchase-balance" id="purchaseBalance"></div>
+    <div class="purchase-btns">
+      <button class="purchase-cancel-btn" id="purchaseCancelBtn">やめる</button>
+      <button class="purchase-confirm-btn" id="purchaseConfirmBtn">購入する</button>
+    </div>
+  </div>
+</div>
+
+<!-- Leaderboard Screen -->
+<div id="leaderboardScreen" class="hidden">
+  <div class="lb-header">
+    <button class="lb-back-btn" id="lbBackBtn">← 戻る</button>
+    <span class="lb-title">ランキング</span>
+    <span style="width:48px;"></span>
+  </div>
+  <div class="lb-my-rank" id="lbMyRank">
+    <div class="lb-my-rank-label">あなた</div>
+    <div class="lb-my-rank-score" id="lbMyScore">---</div>
+  </div>
+  <div class="lb-table" id="lbTable">
+    <div class="lb-loading" id="lbLoading">読み込み中...</div>
+  </div>
+</div>
+
 <!-- Share Toast -->
 <div id="shareToast">Copied!</div>
 
@@ -567,14 +983,21 @@
 
 <!-- Start Screen -->
 <div id="startScreen" class="screen">
+  <button id="shopBtn">
+    🛒
+    <span class="shop-notify-dot" id="shopNotifyDot"></span>
+  </button>
   <button id="settingsBtn">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
   </button>
+  <button id="rankingBtn">🏆</button>
   <h1>Tilt Tower</h1>
   <p class="subtitle">どこまで積める？</p>
   <p class="start-best" id="startBest"></p>
   <p class="start-greeting" id="startGreeting"></p>
+  <div class="start-equipped-row" id="startEquippedRow"></div>
   <div id="startCoins" class="start-coins">🪙 <span id="coinBalance">0</span></div>
+  <div id="startFomo" class="start-fomo-text" style="display:none;"></div>
   <div id="dailyBonusCard" class="hidden">
     <div class="daily-title">デイリーボーナス</div>
     <div class="daily-dots" id="dailyDots"></div>
@@ -597,6 +1020,7 @@
   <div id="streakMultiplier"></div>
   <div class="best-score" id="bestScore"></div>
   <button class="btn-share" id="shareBtn">Share</button>
+  <button class="btn-ranking" id="goRankingBtn">🏆 ランキング</button>
   <button class="btn" id="retryBtn">RETRY</button>
 </div>
 
@@ -937,8 +1361,430 @@ const BLOCK_COLORS = [
   ['#fcd34d', '#fdba74'],
 ];
 
+// ===== Skin Data =====
+const BLOCK_SKINS = {
+  default: { id:'default', name:'デフォルト', price:0, colors:[['#4facfe','#00b4d8'],['#a78bfa','#e879f9'],['#f472b6','#fb7185'],['#4facfe','#34d399'],['#fb923c','#fbbf24'],['#6ee7b7','#a7f3d0'],['#a3e635','#4ade80'],['#fcd34d','#fdba74']] },
+  neon: { id:'neon', name:'ネオン', price:300, colors:[['#ff00ff','#ff44cc'],['#00ff88','#44ffaa'],['#00ccff','#44ddff'],['#ffff00','#ffcc00'],['#ff4444','#ff6666'],['#ff8800','#ffaa44'],['#aa00ff','#cc44ff'],['#00ffff','#44ffff']] },
+  pastel: { id:'pastel', name:'パステル', price:200, colors:[['#ffc8dd','#ffafcc'],['#bde0fe','#a2d2ff'],['#cdb4db','#e2c2f0'],['#a8dadc','#b5e2e0'],['#ffd6a5','#ffcb8e'],['#caffbf','#b8f0a8'],['#fdffb6','#faf0a0'],['#ffc6ff','#f0b0f0']] },
+  metallic: { id:'metallic', name:'メタリック', price:500, colors:[['#c0c0c0','#a8a8a8'],['#ffd700','#daa520'],['#cd7f32','#b87333'],['#b0c4de','#8fafc8'],['#e5e4e2','#c0c0c0'],['#d4af37','#c5a028'],['#8c7853','#7a6845'],['#aaa9ad','#9898a0']] },
+  ocean: { id:'ocean', name:'オーシャン', price:350, colors:[['#006994','#014f73'],['#00a6fb','#0085d0'],['#00d4aa','#00b89c'],['#48cae4','#3ab8d2'],['#0077b6','#005f92'],['#90e0ef','#70c8dd'],['#023e8a','#012d6b'],['#caf0f8','#a8d8e8']] },
+  sakura: { id:'sakura', name:'桜', price:400, seasonal:{month:4}, colors:[['#ffb7c5','#ff9eb5'],['#ffc0cb','#ffaabb'],['#fff0f5','#ffe0eb'],['#ff69b4','#ff5aa0'],['#ffb6c1','#ffa0b0'],['#ffd1dc','#ffbfcc'],['#ff85a2','#ff7092'],['#ffe4e1','#ffd0cc']] },
+  cyber: { id:'cyber', name:'サイバー', price:600, colors:[['#0ff','#0cc'],['#f0f','#c0c'],['#0f0','#0c0'],['#ff0','#cc0'],['#f00','#c00'],['#00f','#00c'],['#f80','#c60'],['#80f','#60c']] },
+  galaxy: { id:'galaxy', name:'銀河', price:800, rotation:true, colors:[['#4b0082','#380060'],['#8a2be2','#7020c0'],['#9370db','#7b60c8'],['#483d8b','#362c70'],['#6a5acd','#5848b0'],['#7b68ee','#6858d8'],['#e6e6fa','#d4d4f0'],['#dda0dd','#cc90cc']] },
+};
+
+const BG_THEMES = {
+  default: { id:'default', name:'デフォルト', price:0,
+    darkStages:[{t:'#0a0a2e',b:'#1a1a4e'},{t:'#1a0a3e',b:'#3a1a4e'},{t:'#2a1040',b:'#6b2040'},{t:'#050510',b:'#0a0a2e'}],
+    lightStages:[{t:'#f0f4f8',b:'#dce3ed'},{t:'#e8ecf4',b:'#d0d8e8'},{t:'#e4ddf0',b:'#cfc4e6'},{t:'#f0e0d8',b:'#e8d0c0'}],
+    overlay:null, previewColors:['#0a0a2e','#1a1a4e','#3a1a4e','#6b2040'] },
+  ocean: { id:'ocean', name:'深海', price:400,
+    darkStages:[{t:'#001220',b:'#002040'},{t:'#001830',b:'#003060'},{t:'#002040',b:'#004080'},{t:'#000810',b:'#001830'}],
+    lightStages:[{t:'#e0f0ff',b:'#c0e0f8'},{t:'#d0e8ff',b:'#b0d8f0'},{t:'#c0e0ff',b:'#a0d0e8'},{t:'#e8f4ff',b:'#d0e8f8'}],
+    overlay:'bubbles', previewColors:['#001220','#002040','#003060','#004080'] },
+  sakuraBg: { id:'sakuraBg', name:'桜並木', price:450, seasonal:{month:4},
+    darkStages:[{t:'#1a0a1e',b:'#2a1028'},{t:'#2a1028',b:'#3a1838'},{t:'#3a1838',b:'#4a2048'},{t:'#0a0510',b:'#1a0a1e'}],
+    lightStages:[{t:'#fff0f5',b:'#ffe4ed'},{t:'#ffe8f0',b:'#ffd8e5'},{t:'#ffdce5',b:'#ffccdd'},{t:'#fff4f8',b:'#ffe8f0'}],
+    overlay:'petals', previewColors:['#fff0f5','#ffc0cb','#ff69b4','#ffb7c5'] },
+  cyberpunk: { id:'cyberpunk', name:'サイバーパンク', price:500,
+    darkStages:[{t:'#0a0014',b:'#14002a'},{t:'#14002a',b:'#1e0040'},{t:'#1e0040',b:'#280060'},{t:'#050010',b:'#0a0014'}],
+    lightStages:[{t:'#f0e4ff',b:'#e0d0ff'},{t:'#e8d8ff',b:'#d8c4ff'},{t:'#e0ccff',b:'#d0b8ff'},{t:'#f4ecff',b:'#e8dcff'}],
+    overlay:'scanlines', previewColors:['#0a0014','#14002a','#1e0040','#f0f'] },
+  sunset: { id:'sunset', name:'サンセット', price:450, rotation:true,
+    darkStages:[{t:'#1a0a00',b:'#2a1500'},{t:'#2a1500',b:'#4a2000'},{t:'#4a2000',b:'#6b3000'},{t:'#0a0500',b:'#1a0a00'}],
+    lightStages:[{t:'#fff8f0',b:'#ffe8d0'},{t:'#fff0e0',b:'#ffe0c0'},{t:'#ffe8d0',b:'#ffd8b0'},{t:'#fffaf4',b:'#fff0e4'}],
+    overlay:null, previewColors:['#ff8c00','#ff6347','#ff4500','#ffd700'] },
+  snow: { id:'snow', name:'雪', price:400, seasonal:{month:12},
+    darkStages:[{t:'#0a1020',b:'#142040'},{t:'#142040',b:'#1e3060'},{t:'#1e3060',b:'#284080'},{t:'#050810',b:'#0a1020'}],
+    lightStages:[{t:'#f0f4ff',b:'#e0e8f8'},{t:'#e8f0ff',b:'#d8e4f0'},{t:'#e0ecff',b:'#d0e0e8'},{t:'#f4f8ff',b:'#e8f0f8'}],
+    overlay:'snowfall', previewColors:['#e0ecff','#c0d8f0','#a0c4e0','#fff'] },
+};
+
+const EFFECT_SKINS = {
+  default: { id:'default', name:'デフォルト', price:0, shape:'circle',
+    colors:['#ffe066','#ff6b6b','#4facfe','#34d399','#e879f9'], previewColors:['#ffe066','#ff6b6b','#4facfe','#34d399'] },
+  fire: { id:'fire', name:'炎', price:350, shape:'circle',
+    colors:['#ff4500','#ff6600','#ff8800','#ffaa00','#ffcc00'], previewColors:['#ff4500','#ff6600','#ff8800','#ffcc00'] },
+  starEffect: { id:'starEffect', name:'星', price:400, shape:'star',
+    colors:['#ffd700','#fff8dc','#ffe4b5','#ffdab9','#fff'], previewColors:['#ffd700','#fff8dc','#ffe4b5','#fff'] },
+  flowers: { id:'flowers', name:'花びら', price:400, seasonal:{month:4}, shape:'petal',
+    colors:['#ffb7c5','#ffc0cb','#ff69b4','#ff85a2','#fff0f5'], previewColors:['#ffb7c5','#ffc0cb','#ff69b4','#fff0f5'] },
+  snowflakes: { id:'snowflakes', name:'雪', price:400, seasonal:{month:12}, shape:'snowflake',
+    colors:['#e0f0ff','#c0e0ff','#a0d0ff','#ffffff','#d0e8ff'], previewColors:['#e0f0ff','#c0e0ff','#fff','#d0e8ff'] },
+  pixel: { id:'pixel', name:'ピクセル', price:500, rotation:true, shape:'square',
+    colors:['#00ff00','#ff00ff','#00ffff','#ffff00','#ff0000'], previewColors:['#00ff00','#ff00ff','#00ffff','#ffff00'] },
+};
+
+const UI_THEMES = {
+  default: { id:'default', name:'デフォルト', price:0, vars:{}, previewColors:['#4facfe','#ffe066','#fff'] },
+  retro: { id:'retro', name:'レトロ', price:300,
+    vars:{'--accent':'#e74c3c','--accent-glow':'rgba(231,76,60,0.4)','--coin-gold':'#f39c12','--coin-glow':'rgba(243,156,18,0.4)'},
+    previewColors:['#e74c3c','#f39c12','#2ecc71'] },
+  minimal: { id:'minimal', name:'ミニマル', price:250,
+    vars:{'--accent':'#888','--accent-glow':'rgba(136,136,136,0.3)','--coin-gold':'#aaa','--coin-glow':'rgba(170,170,170,0.3)'},
+    previewColors:['#888','#aaa','#ccc'] },
+  neonGlow: { id:'neonGlow', name:'ネオングロー', price:500, rotation:true,
+    vars:{'--accent':'#f0f','--accent-glow':'rgba(255,0,255,0.5)','--coin-gold':'#0ff','--coin-glow':'rgba(0,255,255,0.4)'},
+    previewColors:['#f0f','#0ff','#0f0'] },
+  matcha: { id:'matcha', name:'抹茶', price:350,
+    vars:{'--accent':'#8bc34a','--accent-glow':'rgba(139,195,74,0.4)','--coin-gold':'#cddc39','--coin-glow':'rgba(205,220,57,0.4)'},
+    previewColors:['#8bc34a','#cddc39','#4caf50'] },
+};
+
+// ===== Inventory =====
+let ownedSkins = { blocks:['default'], backgrounds:['default'], effects:['default'], uiThemes:['default'] };
+let equippedSkins = { blocks:'default', backgrounds:'default', effects:'default', uiThemes:'default' };
+
+function loadInventory() {
+  try { const o = JSON.parse(localStorage.getItem('tiltTower_ownedSkins')); if (o) ownedSkins = o; } catch(e) {}
+  try { const e = JSON.parse(localStorage.getItem('tiltTower_equippedSkins')); if (e) equippedSkins = e; } catch(e) {}
+  // Ensure defaults
+  ['blocks','backgrounds','effects','uiThemes'].forEach(cat => {
+    if (!ownedSkins[cat]) ownedSkins[cat] = ['default'];
+    if (!ownedSkins[cat].includes('default')) ownedSkins[cat].unshift('default');
+    if (!equippedSkins[cat]) equippedSkins[cat] = 'default';
+  });
+}
+
+function saveInventory() {
+  localStorage.setItem('tiltTower_ownedSkins', JSON.stringify(ownedSkins));
+  localStorage.setItem('tiltTower_equippedSkins', JSON.stringify(equippedSkins));
+}
+
+loadInventory();
+
+// ===== Rotation & Seasonal =====
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function getISOWeek(d) {
+  const date = new Date(d.getTime());
+  date.setHours(0,0,0,0);
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  const week1 = new Date(date.getFullYear(), 0, 4);
+  return 1 + Math.round(((date - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+}
+
+function getWeeklyRotation(date) {
+  const d = date || new Date();
+  const seed = d.getFullYear() * 100 + getISOWeek(d);
+  const rng = mulberry32(seed);
+  // Collect all rotation items across categories
+  const rotationItems = [];
+  const addItems = (catalog) => {
+    for (const [id, item] of Object.entries(catalog)) {
+      if (item.rotation) rotationItems.push(id);
+    }
+  };
+  addItems(BLOCK_SKINS); addItems(BG_THEMES); addItems(EFFECT_SKINS); addItems(UI_THEMES);
+  // Shuffle and pick 2-3
+  for (let i = rotationItems.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [rotationItems[i], rotationItems[j]] = [rotationItems[j], rotationItems[i]];
+  }
+  return rotationItems.slice(0, Math.min(3, rotationItems.length));
+}
+
+function getNextMondayMs() {
+  const now = new Date();
+  const day = now.getDay();
+  const daysUntilMonday = day === 0 ? 1 : (8 - day);
+  const next = new Date(now);
+  next.setDate(now.getDate() + daysUntilMonday);
+  next.setHours(0, 0, 0, 0);
+  return next.getTime() - now.getTime();
+}
+
+function formatCountdown(ms) {
+  const hours = Math.floor(ms / 3600000);
+  const days = Math.floor(hours / 24);
+  const h = hours % 24;
+  if (days > 0) return `残り${days}日${h}時間`;
+  return `残り${h}時間`;
+}
+
+function isSeasonalAvailable(item) {
+  if (!item.seasonal) return true;
+  return (new Date().getMonth() + 1) === item.seasonal.month;
+}
+
+// ===== Shop Logic =====
+let currentShopTab = 'blocks';
+let pendingPurchase = null;
+
+function getCatalogForTab(tab) {
+  if (tab === 'blocks') return BLOCK_SKINS;
+  if (tab === 'backgrounds') return BG_THEMES;
+  if (tab === 'effects') return EFFECT_SKINS;
+  if (tab === 'uiThemes') return UI_THEMES;
+  return BLOCK_SKINS;
+}
+
+function getCategoryForTab(tab) { return tab; }
+
+function openShop() {
+  document.getElementById('shopScreen').classList.remove('hidden');
+  document.getElementById('shopCoins').textContent = coinBalance;
+  renderShopTab(currentShopTab);
+}
+
+function closeShop() {
+  document.getElementById('shopScreen').classList.add('hidden');
+  localStorage.setItem('tiltTower_lastShopVisit', getTodayDateStr());
+  updateShopNotifyDot();
+}
+
+function renderShopTab(tab) {
+  currentShopTab = tab;
+  document.querySelectorAll('.shop-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  const grid = document.getElementById('shopGrid');
+  const catalog = getCatalogForTab(tab);
+  const category = getCategoryForTab(tab);
+  const owned = ownedSkins[category] || [];
+  const equipped = equippedSkins[category] || 'default';
+  const rotation = getWeeklyRotation();
+  const currentMonth = new Date().getMonth() + 1;
+
+  // Rotation section
+  const rotSection = document.getElementById('shopRotationSection');
+  const rotGrid = document.getElementById('shopRotationGrid');
+  const rotItems = [];
+  for (const [id, item] of Object.entries(catalog)) {
+    if (item.rotation && rotation.includes(id) && !owned.includes(id)) {
+      rotItems.push([id, item]);
+    }
+  }
+  if (rotItems.length > 0) {
+    rotSection.style.display = '';
+    document.getElementById('rotationTimer').textContent = formatCountdown(getNextMondayMs());
+    rotGrid.innerHTML = rotItems.map(([id, item]) => buildShopCard(id, item, category, owned, equipped)).join('');
+  } else {
+    rotSection.style.display = 'none';
+  }
+
+  // Main grid
+  let html = '';
+  for (const [id, item] of Object.entries(catalog)) {
+    if (item.seasonal && item.seasonal.month !== currentMonth && !owned.includes(id)) continue;
+    if (item.rotation && !rotation.includes(id) && !owned.includes(id)) continue;
+    html += buildShopCard(id, item, category, owned, equipped);
+  }
+  grid.innerHTML = html;
+
+  // Ownership count
+  const totalAvailable = Object.keys(catalog).length;
+  document.getElementById('shopOwnCount').textContent = `${owned.length}/${totalAvailable} 所持中`;
+}
+
+function buildShopCard(id, item, category, owned, equipped) {
+  const isOwned = owned.includes(id);
+  const isEquipped = equipped === id;
+  const canAfford = coinBalance >= item.price;
+  const rotation = getWeeklyRotation();
+
+  let badge = '';
+  if (item.rotation && rotation.includes(id) && !isOwned) badge = '<div class="shop-card-badge">LIMITED</div>';
+  else if (item.seasonal && !isOwned) badge = '<div class="shop-card-badge seasonal">季節限定</div>';
+
+  let preview = '';
+  const previewSrc = item.colors || item.previewColors;
+  if (previewSrc) {
+    const samples = (item.colors || []).slice(0, 6);
+    if (samples.length > 0) {
+      preview = samples.map(c => {
+        const c0 = Array.isArray(c) ? c[0] : c;
+        const c1 = Array.isArray(c) ? c[1] : c;
+        return `<div class="shop-preview-swatch" style="background:linear-gradient(135deg,${c0},${c1})"></div>`;
+      }).join('');
+    } else if (item.previewColors) {
+      preview = item.previewColors.map(c =>
+        `<div class="shop-preview-swatch" style="background:${c}"></div>`
+      ).join('');
+    }
+  }
+
+  let priceHTML, btnHTML;
+  if (item.price === 0) {
+    priceHTML = '<div class="shop-card-price">無料</div>';
+    btnHTML = isEquipped
+      ? '<button class="shop-card-btn equipped-btn">✓ 装備中</button>'
+      : `<button class="shop-card-btn equip" onclick="equipSkin('${category}','${id}')">装備する</button>`;
+  } else if (isOwned) {
+    priceHTML = '<div class="shop-card-price">所持中</div>';
+    btnHTML = isEquipped
+      ? '<button class="shop-card-btn equipped-btn">✓ 装備中</button>'
+      : `<button class="shop-card-btn equip" onclick="equipSkin('${category}','${id}')">装備する</button>`;
+  } else {
+    priceHTML = `<div class="shop-card-price ${canAfford ? '' : 'insufficient'}">🪙 ${item.price}</div>`;
+    btnHTML = canAfford
+      ? `<button class="shop-card-btn buy" onclick="showPurchaseDialog('${category}','${id}')">購入</button>`
+      : '<button class="shop-card-btn buy" disabled>コイン不足</button>';
+  }
+
+  return `<div class="shop-card ${isEquipped ? 'equipped' : ''}">
+    ${badge}
+    <div class="shop-preview">${preview}</div>
+    <div class="shop-card-name">${item.name}</div>
+    ${priceHTML}
+    ${btnHTML}
+  </div>`;
+}
+
+function showPurchaseDialog(category, id) {
+  const catalog = getCatalogForTab(category);
+  const item = catalog[id];
+  if (!item) return;
+  pendingPurchase = { category, id, item };
+
+  document.getElementById('purchaseItemName').textContent = item.name;
+  const previewEl = document.getElementById('purchasePreview');
+  const previewSrc = item.colors || item.previewColors || [];
+  const samples = (item.colors || []).slice(0, 6);
+  if (samples.length > 0) {
+    previewEl.innerHTML = samples.map(c => {
+      const c0 = Array.isArray(c) ? c[0] : c;
+      const c1 = Array.isArray(c) ? c[1] : c;
+      return `<div class="shop-preview-swatch" style="background:linear-gradient(135deg,${c0},${c1})"></div>`;
+    }).join('');
+  } else if (item.previewColors) {
+    previewEl.innerHTML = item.previewColors.map(c =>
+      `<div class="shop-preview-swatch" style="background:${c}"></div>`
+    ).join('');
+  }
+  document.getElementById('purchasePrice').textContent = `🪙 ${item.price}`;
+  document.getElementById('purchaseBalance').textContent = `残高: 🪙 ${coinBalance} → ${coinBalance - item.price}`;
+  document.getElementById('purchaseDialog').classList.remove('hidden');
+}
+
+function closePurchaseDialog() {
+  document.getElementById('purchaseDialog').classList.add('hidden');
+  pendingPurchase = null;
+}
+
+function confirmPurchase() {
+  if (!pendingPurchase) return;
+  const { category, id, item } = pendingPurchase;
+  if (coinBalance < item.price) return;
+  coinBalance -= item.price;
+  saveCoins();
+  if (!ownedSkins[category]) ownedSkins[category] = ['default'];
+  ownedSkins[category].push(id);
+  saveInventory();
+  sfxPurchase();
+  vibrate([20, 30, 60]);
+  closePurchaseDialog();
+  document.getElementById('shopCoins').textContent = coinBalance;
+  renderShopTab(currentShopTab);
+  updateCoinDisplay();
+}
+
+function equipSkin(category, id) {
+  equippedSkins[category] = id;
+  saveInventory();
+  sfxEquip();
+  vibrate(15);
+  if (category === 'uiThemes') applyUiTheme(id);
+  document.getElementById('shopCoins').textContent = coinBalance;
+  renderShopTab(currentShopTab);
+}
+
+function applyUiTheme(themeId) {
+  const theme = UI_THEMES[themeId];
+  // Reset to defaults first
+  const defaults = {'--accent':'','--accent-glow':'','--coin-gold':'','--coin-glow':''};
+  for (const key of Object.keys(defaults)) {
+    document.documentElement.style.removeProperty(key);
+  }
+  if (theme && theme.vars) {
+    for (const [k, v] of Object.entries(theme.vars)) {
+      document.documentElement.style.setProperty(k, v);
+    }
+  }
+}
+
+// Apply saved UI theme on load
+applyUiTheme(equippedSkins.uiThemes);
+
+// ===== SFX: Purchase & Equip =====
+function sfxPurchase() {
+  playTone('sine', 523, 80, 0.15);
+  setTimeout(() => playTone('sine', 659, 80, 0.15), 60);
+  setTimeout(() => playTone('sine', 784, 80, 0.18), 120);
+  setTimeout(() => playTone('sine', 1047, 200, 0.2), 180);
+}
+
+function sfxEquip() {
+  playTone('sine', 880, 60, 0.12);
+  setTimeout(() => playTone('triangle', 1100, 100, 0.15), 50);
+}
+
+// ===== Shop Notification Dot =====
+function updateShopNotifyDot() {
+  const dot = document.getElementById('shopNotifyDot');
+  if (!dot) return;
+  const lastVisit = localStorage.getItem('tiltTower_lastShopVisit') || '';
+  const lastRotation = localStorage.getItem('tiltTower_lastSeenRotation') || '';
+  const now = new Date();
+  const currentWeek = now.getFullYear() + '-W' + getISOWeek(now);
+  const hasNewRotation = lastRotation !== currentWeek;
+  const hasNewSeasonal = checkNewSeasonalItems();
+  dot.classList.toggle('show', hasNewRotation || hasNewSeasonal);
+}
+
+function checkNewSeasonalItems() {
+  const month = new Date().getMonth() + 1;
+  const cats = [BLOCK_SKINS, BG_THEMES, EFFECT_SKINS, UI_THEMES];
+  const catKeys = ['blocks', 'backgrounds', 'effects', 'uiThemes'];
+  for (let i = 0; i < cats.length; i++) {
+    for (const [id, item] of Object.entries(cats[i])) {
+      if (item.seasonal && item.seasonal.month === month && !ownedSkins[catKeys[i]].includes(id)) return true;
+    }
+  }
+  return false;
+}
+
+// ===== FOMO Text =====
+function updateFomoText() {
+  const fomoEl = document.getElementById('startFomo');
+  if (!fomoEl) return;
+  const rotation = getWeeklyRotation();
+  const hasUnowned = rotation.some(id => {
+    for (const cat of ['blocks','backgrounds','effects','uiThemes']) {
+      if (!ownedSkins[cat].includes(id)) return true;
+    }
+    return false;
+  });
+  if (hasUnowned) {
+    fomoEl.textContent = '今週の限定アイテムが終わる前にゲットしよう!';
+    fomoEl.style.display = '';
+  } else {
+    fomoEl.style.display = 'none';
+  }
+}
+
+// ===== Start Screen Equipped Preview =====
+function updateEquippedPreview() {
+  const row = document.getElementById('startEquippedRow');
+  if (!row) return;
+  const skinId = equippedSkins.blocks;
+  const skin = BLOCK_SKINS[skinId] || BLOCK_SKINS.default;
+  row.innerHTML = skin.colors.slice(0, 5).map(c => {
+    const c0 = Array.isArray(c) ? c[0] : c;
+    const c1 = Array.isArray(c) ? c[1] : c;
+    return `<div class="start-equipped-swatch" style="background:linear-gradient(135deg,${c0},${c1})"></div>`;
+  }).join('');
+}
+
 function getBlockColor(i) {
-  return BLOCK_COLORS[i % BLOCK_COLORS.length];
+  const skinId = equippedSkins.blocks;
+  const skin = BLOCK_SKINS[skinId] || BLOCK_SKINS.default;
+  return skin.colors[i % skin.colors.length];
 }
 
 function vibrate(pattern) {
@@ -948,30 +1794,9 @@ function vibrate(pattern) {
 // ===== Background Color Stages =====
 function getBgColors(blockCount) {
   const isDark = !document.documentElement.classList.contains('light');
-  if (!isDark) {
-    // Light mode: subtle progression
-    const stages = [
-      { t: '#f0f4f8', b: '#dce3ed' },
-      { t: '#e8ecf4', b: '#d0d8e8' },
-      { t: '#e4ddf0', b: '#cfc4e6' },
-      { t: '#f0e0d8', b: '#e8d0c0' },
-    ];
-    const idx = Math.min(Math.floor(blockCount / 10), stages.length - 1);
-    const next = Math.min(idx + 1, stages.length - 1);
-    const frac = (blockCount % 10) / 10;
-    return {
-      top: lerpColor(stages[idx].t, stages[next].t, frac),
-      bot: lerpColor(stages[idx].b, stages[next].b, frac),
-      stars: false,
-    };
-  }
-  // Dark mode: night → sunset → space
-  const stages = [
-    { t: '#0a0a2e', b: '#1a1a4e' },  // night
-    { t: '#1a0a3e', b: '#3a1a4e' },  // deep purple
-    { t: '#2a1040', b: '#6b2040' },  // sunset
-    { t: '#050510', b: '#0a0a2e' },  // space
-  ];
+  const themeId = equippedSkins.backgrounds;
+  const theme = BG_THEMES[themeId] || BG_THEMES.default;
+  const stages = isDark ? theme.darkStages : theme.lightStages;
   const idx = Math.min(Math.floor(blockCount / 10), stages.length - 1);
   const next = Math.min(idx + 1, stages.length - 1);
   const frac = (blockCount % 10) / 10;
@@ -979,6 +1804,7 @@ function getBgColors(blockCount) {
     top: lerpColor(stages[idx].t, stages[next].t, frac),
     bot: lerpColor(stages[idx].b, stages[next].b, frac),
     stars: blockCount >= 25,
+    overlay: theme.overlay,
   };
 }
 
@@ -1034,6 +1860,20 @@ function init() {
   // Settings
   document.getElementById('settingsBtn').addEventListener('click', () => { sfxButton(); openSettings(); });
   document.getElementById('settingsCloseBtn').addEventListener('click', () => { sfxButton(); closeSettings(); });
+
+  // Shop
+  document.getElementById('shopBtn').addEventListener('click', () => { sfxButton(); openShop(); });
+  document.getElementById('shopBackBtn').addEventListener('click', () => { sfxButton(); closeShop(); });
+  document.querySelectorAll('.shop-tab').forEach(tab => {
+    tab.addEventListener('click', () => { sfxButton(); renderShopTab(tab.dataset.tab); });
+  });
+  document.getElementById('purchaseCancelBtn').addEventListener('click', () => { sfxButton(); closePurchaseDialog(); });
+  document.getElementById('purchaseConfirmBtn').addEventListener('click', () => { confirmPurchase(); });
+
+  // Ranking
+  document.getElementById('rankingBtn').addEventListener('click', () => { sfxButton(); openLeaderboard(); });
+  document.getElementById('goRankingBtn').addEventListener('click', () => { sfxButton(); openLeaderboard(); });
+  document.getElementById('lbBackBtn').addEventListener('click', () => { sfxButton(); closeLeaderboard(); });
   document.getElementById('sensitivitySlider').addEventListener('input', (e) => {
     document.getElementById('sensitivityVal').textContent = parseFloat(e.target.value).toFixed(1);
   });
@@ -1099,6 +1939,9 @@ function updateStartScreen() {
   }
   updateCoinDisplay();
   updateDailyBonusCard();
+  updateEquippedPreview();
+  updateFomoText();
+  updateShopNotifyDot();
 }
 
 function openSettings() {
@@ -1236,6 +2079,7 @@ function startGame() {
   blocks = [];
   particles = [];
   textParticles = [];
+  bgOverlayParticles = [];
   comboCount = 0;
   peakCombo = 0;
   dropSpeed = DROP_SPEED_INIT;
@@ -1518,6 +2362,11 @@ function gameOver() {
 
     document.getElementById('gameOverScreen').classList.remove('hidden');
     updateStartScreen();
+
+    // Firebase: submit score if new best
+    if (isNewBest && playerName) {
+      submitScore(score, placedCount, peakCombo);
+    }
   }, 800);
 }
 
@@ -1581,8 +2430,9 @@ function spawnScoreText(x, y, points, isPerfect) {
 
 // ===== Confetti (NEW BEST) =====
 function spawnConfetti() {
-  const colors = ['#ff6b6b','#ffd93d','#4facfe','#34d399','#e879f9','#fb923c','#a78bfa'];
-  const count = Math.round(40 * PARTICLE_MULT); // was 120
+  const effSkin = EFFECT_SKINS[equippedSkins.effects] || EFFECT_SKINS.default;
+  const colors = effSkin.colors.length > 0 ? effSkin.colors : ['#ff6b6b','#ffd93d','#4facfe','#34d399','#e879f9','#fb923c','#a78bfa'];
+  const count = Math.round(40 * PARTICLE_MULT);
   for (let i = 0; i < count; i++) {
     addParticle({
       x: W * Math.random(),
@@ -1638,7 +2488,8 @@ function spawnPerfectParticles(block) {
       vy: -Math.random() * 5 - 2,
       life: 1, decay: 0.015 + Math.random() * 0.01,
       size: 3 + Math.random() * 4,
-      color: '#ffe066',
+      color: getEffectColor(),
+      useEffectShape: true,
     });
   }
 }
@@ -1786,24 +2637,72 @@ function roundRect(x, y, w, h, r) {
   ctx.fill();
 }
 
+function drawParticleShape(x, y, size, shape) {
+  if (shape === 'star') {
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a = (i * 4 * Math.PI / 5) - Math.PI / 2;
+      const r = i === 0 ? size : size;
+      ctx[i === 0 ? 'moveTo' : 'lineTo'](x + Math.cos(a) * r, y + Math.sin(a) * r);
+      const a2 = a + 2 * Math.PI / 5;
+      ctx.lineTo(x + Math.cos(a2) * (r * 0.4), y + Math.sin(a2) * (r * 0.4));
+    }
+    ctx.closePath(); ctx.fill();
+  } else if (shape === 'petal') {
+    ctx.save(); ctx.translate(x, y);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, size * 1.5, size * 0.6, Math.random() * Math.PI, 0, Math.PI * 2);
+    ctx.fill(); ctx.restore();
+  } else if (shape === 'snowflake') {
+    ctx.save(); ctx.translate(x, y);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = ctx.fillStyle;
+    for (let i = 0; i < 3; i++) {
+      const a = i * Math.PI / 3;
+      ctx.beginPath();
+      ctx.moveTo(-Math.cos(a) * size, -Math.sin(a) * size);
+      ctx.lineTo(Math.cos(a) * size, Math.sin(a) * size);
+      ctx.stroke();
+    }
+    ctx.restore();
+  } else if (shape === 'square') {
+    ctx.fillRect(x - size, y - size, size * 2, size * 2);
+  } else {
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function getEffectShape() {
+  const skin = EFFECT_SKINS[equippedSkins.effects] || EFFECT_SKINS.default;
+  return skin.shape || 'circle';
+}
+
+function getEffectColor() {
+  const skin = EFFECT_SKINS[equippedSkins.effects] || EFFECT_SKINS.default;
+  return skin.colors[Math.floor(Math.random() * skin.colors.length)];
+}
+
 function drawParticles(camY) {
-  const PI2 = Math.PI * 2;
+  const shape = getEffectShape();
   for (let i = 0, len = particles.length; i < len; i++) {
     const p = particles[i];
     const py = p.isConfetti ? p.y : p.y + camY;
-    // Skip off-screen
     if (py < -20 || py > H + 20 || p.x < -20 || p.x > W + 20) continue;
     ctx.globalAlpha = p.life;
     ctx.fillStyle = p.color;
     if (p.isConfetti) {
       ctx.save();
       ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot * 0.01745329); // deg→rad inline
+      ctx.rotate(p.rot * 0.01745329);
       ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
       ctx.restore();
+    } else if (p.useEffectShape) {
+      drawParticleShape(p.x, py, p.size, shape);
     } else {
       ctx.beginPath();
-      ctx.arc(p.x, py, p.size, 0, PI2);
+      ctx.arc(p.x, py, p.size, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -1881,6 +2780,114 @@ function drawBackground(camY) {
       ctx.fillRect(0, markerY, W, 1);
     }
   }
+
+  // Background overlay (bubbles, petals, snowfall, scanlines)
+  if (bg.overlay) drawBgOverlay(bg.overlay, camY);
+}
+
+// ===== Background Overlay Effects =====
+let bgOverlayParticles = [];
+const MAX_BG_OVERLAY = isMobile ? 12 : 25;
+
+// Scanline: offscreen canvas cache (1回描画 → 毎フレームdrawImage)
+let scanlineCanvas = null;
+let scanlineCacheW = 0;
+let scanlineCacheH = 0;
+
+function getScanlineCanvas() {
+  if (scanlineCanvas && scanlineCacheW === W && scanlineCacheH === H) return scanlineCanvas;
+  scanlineCanvas = document.createElement('canvas');
+  scanlineCanvas.width = W;
+  scanlineCanvas.height = H;
+  scanlineCacheW = W;
+  scanlineCacheH = H;
+  const sctx = scanlineCanvas.getContext('2d');
+  sctx.fillStyle = '#000';
+  for (let sy = 0; sy < H; sy += 3) {
+    sctx.fillRect(0, sy, W, 1);
+  }
+  return scanlineCanvas;
+}
+
+function drawBgOverlay(type, camY) {
+  // Scanlines: cached offscreen canvas, 1 drawImage per frame
+  if (type === 'scanlines') {
+    ctx.save();
+    ctx.globalAlpha = 0.03;
+    ctx.drawImage(getScanlineCanvas(), 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    return;
+  }
+
+  const time = Date.now() * 0.001;
+  // Spawn if needed
+  while (bgOverlayParticles.length < MAX_BG_OVERLAY) {
+    bgOverlayParticles.push(spawnBgOverlayParticle(type));
+  }
+  ctx.save();
+  for (let i = bgOverlayParticles.length - 1; i >= 0; i--) {
+    const p = bgOverlayParticles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    if (type === 'petals') { p.x += Math.sin(time * 1.5 + p.phase) * 0.3; p.rot += p.rotV; }
+    if (type === 'snowfall') { p.x += Math.sin(time + p.phase) * 0.2; p.rot += p.rotV; }
+    if (type === 'bubbles') { p.x += Math.sin(time * 0.8 + p.phase) * 0.15; }
+    // Reset if off screen
+    if (p.y > H + 20 || p.y < -20 || p.x > W + 20 || p.x < -20) {
+      bgOverlayParticles[i] = spawnBgOverlayParticle(type);
+      continue;
+    }
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle = p.color;
+    if (type === 'bubbles') {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = 0.5;
+      ctx.globalAlpha = p.alpha * 0.5;
+      ctx.stroke();
+      ctx.globalAlpha = p.alpha * 0.15;
+      ctx.fill();
+    } else if (type === 'petals') {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.size * 1.5, p.size * 0.6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    } else if (type === 'snowfall') {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+function spawnBgOverlayParticle(type) {
+  if (type === 'bubbles') return {
+    x: Math.random() * W, y: H + Math.random() * 40,
+    vx: 0, vy: -0.2 - Math.random() * 0.5,
+    size: 2 + Math.random() * 6, alpha: 0.15 + Math.random() * 0.2,
+    color: '#88ccff', phase: Math.random() * Math.PI * 2,
+  };
+  if (type === 'petals') return {
+    x: Math.random() * W, y: -10 - Math.random() * 40,
+    vx: 0.1 + Math.random() * 0.3, vy: 0.3 + Math.random() * 0.6,
+    size: 2 + Math.random() * 3, alpha: 0.2 + Math.random() * 0.3,
+    color: ['#ffb7c5','#ffc0cb','#ff69b4','#fff0f5'][Math.floor(Math.random()*4)],
+    phase: Math.random() * Math.PI * 2, rot: Math.random() * Math.PI, rotV: 0.01 + Math.random() * 0.02,
+  };
+  if (type === 'snowfall') return {
+    x: Math.random() * W, y: -10 - Math.random() * 40,
+    vx: 0, vy: 0.2 + Math.random() * 0.4,
+    size: 1 + Math.random() * 2.5, alpha: 0.3 + Math.random() * 0.4,
+    color: '#fff', phase: Math.random() * Math.PI * 2, rot: 0, rotV: 0,
+  };
+  return { x: 0, y: 0, vx: 0, vy: 0, size: 0, alpha: 0, color: '#fff', phase: 0 };
 }
 
 function drawComboText(camY) {
@@ -1999,6 +3006,177 @@ function loop() {
   updateTiltIndicator();
 
   requestAnimationFrame(loop);
+}
+
+// ===== Firebase Leaderboard (Lazy Load) =====
+let firebaseApp = null;
+let firebaseAuth = null;
+let firebaseDb = null;
+let firebaseUser = null;
+let firebaseLoaded = false;
+let firebaseLoading = false;
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCj3vTrUUlolXqmjvaZfUiGu6iil8kBFv0",
+  authDomain: "stack-game-ranking.firebaseapp.com",
+  projectId: "stack-game-ranking",
+  storageBucket: "stack-game-ranking.firebasestorage.app",
+  messagingSenderId: "990659666551",
+  appId: "1:990659666551:web:11d5a4932e3c587868dc72"
+};
+
+async function loadFirebase() {
+  if (firebaseLoaded || firebaseLoading) return firebaseLoaded;
+  if (FIREBASE_CONFIG.apiKey === 'REPLACE_WITH_YOUR_API_KEY') {
+    console.warn('Firebase not configured. Leaderboard disabled.');
+    return false;
+  }
+  firebaseLoading = true;
+  try {
+    const [appModule, authModule, fsModule] = await Promise.all([
+      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'),
+      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js'),
+      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'),
+    ]);
+    firebaseApp = appModule.initializeApp(FIREBASE_CONFIG);
+    firebaseAuth = authModule.getAuth(firebaseApp);
+    firebaseDb = fsModule.getFirestore(firebaseApp);
+    // Anonymous auth
+    const result = await authModule.signInAnonymously(firebaseAuth);
+    firebaseUser = result.user;
+    firebaseLoaded = true;
+    firebaseLoading = false;
+    return true;
+  } catch (e) {
+    console.error('Firebase load error:', e);
+    firebaseLoading = false;
+    return false;
+  }
+}
+
+async function submitScore(scoreVal, placedCount, peakComboVal) {
+  if (!await loadFirebase()) return;
+  if (!firebaseUser || !playerName) return;
+  try {
+    const fsModule = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const docRef = fsModule.doc(firebaseDb, 'leaderboard', firebaseUser.uid);
+    const existing = await fsModule.getDoc(docRef);
+    if (existing.exists() && existing.data().score >= scoreVal) return; // Only update if higher
+    const heightM = parseFloat((placedCount * BLOCK_HEIGHT / 100).toFixed(1));
+    await fsModule.setDoc(docRef, {
+      name: playerName,
+      score: scoreVal,
+      blocks: placedCount,
+      height: heightM,
+      peakCombo: peakComboVal,
+      uid: firebaseUser.uid,
+      updatedAt: fsModule.serverTimestamp(),
+    });
+  } catch (e) {
+    console.error('Score submit error:', e);
+  }
+}
+
+async function checkNameAvailable(name) {
+  if (!await loadFirebase()) return true;
+  try {
+    const fsModule = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const nameDoc = await fsModule.getDoc(fsModule.doc(firebaseDb, 'names', name.toLowerCase()));
+    if (!nameDoc.exists()) return true;
+    return nameDoc.data().uid === firebaseUser.uid;
+  } catch (e) {
+    return true; // Allow on error
+  }
+}
+
+async function reserveName(name) {
+  if (!await loadFirebase()) return;
+  if (!firebaseUser) return;
+  try {
+    const fsModule = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    // Release old name
+    const oldName = localStorage.getItem('tiltTower_fbName');
+    if (oldName && oldName.toLowerCase() !== name.toLowerCase()) {
+      try { await fsModule.deleteDoc(fsModule.doc(firebaseDb, 'names', oldName.toLowerCase())); } catch(e) {}
+    }
+    await fsModule.setDoc(fsModule.doc(firebaseDb, 'names', name.toLowerCase()), {
+      uid: firebaseUser.uid,
+      originalCase: name,
+    });
+    localStorage.setItem('tiltTower_fbName', name);
+  } catch (e) {
+    console.error('Name reserve error:', e);
+  }
+}
+
+async function fetchLeaderboard() {
+  if (!await loadFirebase()) return null;
+  try {
+    const fsModule = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const q = fsModule.query(
+      fsModule.collection(firebaseDb, 'leaderboard'),
+      fsModule.orderBy('score', 'desc'),
+      fsModule.limit(100)
+    );
+    const snapshot = await fsModule.getDocs(q);
+    const entries = [];
+    snapshot.forEach(doc => entries.push({ id: doc.id, ...doc.data() }));
+    return entries;
+  } catch (e) {
+    console.error('Leaderboard fetch error:', e);
+    return null;
+  }
+}
+
+function openLeaderboard() {
+  document.getElementById('leaderboardScreen').classList.remove('hidden');
+  const table = document.getElementById('lbTable');
+  const myScoreEl = document.getElementById('lbMyScore');
+  myScoreEl.textContent = bestScoreVal > 0 ? `BEST: ${bestScoreVal}` : '---';
+  table.innerHTML = '<div class="lb-loading">読み込み中...</div>';
+
+  fetchLeaderboard().then(entries => {
+    if (!entries) {
+      table.innerHTML = '<div class="lb-error">読み込みに失敗しました</div>';
+      return;
+    }
+    if (entries.length === 0) {
+      table.innerHTML = '<div class="lb-empty">まだスコアがありません</div>';
+      return;
+    }
+    let myRank = -1;
+    let html = '';
+    entries.forEach((e, i) => {
+      const rank = i + 1;
+      const isMe = firebaseUser && e.uid === firebaseUser.uid;
+      if (isMe) {
+        myRank = rank;
+        myScoreEl.textContent = `#${rank}  スコア ${e.score}`;
+      }
+      let rankClass = '';
+      let rankText = rank;
+      if (rank === 1) { rankClass = 'gold'; rankText = '🥇'; }
+      else if (rank === 2) { rankClass = 'silver'; rankText = '🥈'; }
+      else if (rank === 3) { rankClass = 'bronze'; rankText = '🥉'; }
+      html += `<div class="lb-row ${isMe ? 'me' : ''}">
+        <span class="lb-rank ${rankClass}">${rankText}</span>
+        <span class="lb-name">${escapeHtml(e.name)}</span>
+        <span class="lb-score-col">${e.score}</span>
+        <span class="lb-height-col">${e.height || 0}m</span>
+      </div>`;
+    });
+    table.innerHTML = html;
+  });
+}
+
+function closeLeaderboard() {
+  document.getElementById('leaderboardScreen').classList.add('hidden');
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 // ===== Start =====

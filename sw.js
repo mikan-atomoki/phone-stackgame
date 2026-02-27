@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tilt-tower-v6';
+const CACHE_NAME = 'tilt-tower-v7';
 const ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,20 @@ const ASSETS = [
   './icons/icon-192.svg',
   './icons/icon-512.svg',
 ];
+
+// Firebase / Google API domains — always pass through to network
+const PASSTHROUGH_DOMAINS = [
+  'googleapis.com',
+  'firebaseio.com',
+  'firestore.googleapis.com',
+  'identitytoolkit.googleapis.com',
+  'securetoken.googleapis.com',
+  'gstatic.com',
+];
+
+function isPassthrough(url) {
+  return PASSTHROUGH_DOMAINS.some((d) => url.includes(d));
+}
 
 // Install: cache all assets
 self.addEventListener('install', (event) => {
@@ -29,8 +43,16 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch: Network First for navigation (HTML), Cache First for assets
+// Fetch: Network First for navigation (HTML), Cache First for assets, Passthrough for Firebase
 self.addEventListener('fetch', (event) => {
+  const url = event.request.url;
+
+  // Firebase/Google APIs — always network, no caching
+  if (isPassthrough(url)) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   if (event.request.mode === 'navigate') {
     // HTML — Network First (always get latest when online)
     event.respondWith(
